@@ -56,7 +56,7 @@ export default function Sidebar({ lists, currentListId, onSelectList, onCreateLi
         </div>
       </div>
       
-      <div className="p-6 border-t bg-black flex justify-center cursor-pointer" onClick={onCloseMobile}>
+      <div className="p-6 border-t cursor-pointer" onClick={onCloseMobile}>
         <img src={logoImage} alt="Tá na Lista" className="w-24 h-24 object-contain" />
       </div>
     </div>
