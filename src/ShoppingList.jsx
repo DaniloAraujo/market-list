@@ -361,14 +361,14 @@ export default function ShoppingList() {
                     placeholder="Digite o nome da lista" 
                     className="flex-1" 
                   />
-                  <Button 
+                  {/* <Button 
                     onClick={generateShareLink} 
                     variant="outline" 
                     size="icon" 
                     title="Compartilhar lista"
                   >
                     <Share2 className="w-4 h-4" />
-                  </Button>
+                  </Button> */}
                 </div>
               </CardContent>
             </Card>
@@ -449,7 +449,7 @@ export default function ShoppingList() {
         }}
       />
 
-      <ShareListModal
+      {/* <ShareListModal
         open={showShareModal}
         onOpenChange={setShowShareModal}
         listName={currentList?.name || ''}
@@ -458,7 +458,7 @@ export default function ShoppingList() {
         onCopy={copyToClipboard}
         onShare={shareList}
         onClose={() => setShowShareModal(false)}
-      />
+      /> */}
     </div>
   );
 }
