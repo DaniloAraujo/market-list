@@ -253,11 +253,16 @@ export default function ShoppingList() {
   const addProduct = () => {
     if (!name.trim() || !currentListId) return;
     const priceValue = unitPrice ? parseInt(unitPrice) / 100 : 0;
+    let quantityValue = 1;
+    if (quantity !== '' && quantity !== null && quantity !== undefined) {
+      const parsed = typeof quantity === 'string' ? parseInt(quantity) : quantity;
+      quantityValue = (!isNaN(parsed) && parsed > 0) ? parsed : 1;
+    }
     const newProduct = { 
       id: Date.now().toString(), 
       name: name.trim(), 
       category: category || 'outros', 
-      quantity, 
+      quantity: quantityValue, 
       unitPrice: priceValue, 
       collected: false, 
       timestamp: Date.now() 
@@ -360,6 +365,7 @@ export default function ShoppingList() {
                     onBlur={handleListNameBlur} 
                     placeholder="Digite o nome da lista" 
                     className="flex-1" 
+                    maxLength="80"
                   />
                   {/* <Button 
                     onClick={generateShareLink} 

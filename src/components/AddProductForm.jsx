@@ -33,6 +33,7 @@ export default function AddProductForm({
             onChange={(e) => onNameChange(e.target.value)} 
             onKeyPress={(e) => e.key === 'Enter' && onSubmit()} 
             placeholder="Ex: Arroz, Detergente..." 
+            maxLength="80"
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -55,9 +56,12 @@ export default function AddProductForm({
             <Label>Quantidade</Label>
             <Input 
               type="number" 
-              value={quantity} 
-              onChange={(e) => onQuantityChange(parseInt(e.target.value) || 1)} 
-              min="1" 
+              value={typeof quantity === 'string' && quantity === '' ? '' : (quantity || '')} 
+              onChange={(e) => {
+                const value = e.target.value;
+                onQuantityChange(value === '' ? '' : value);
+              }} 
+              max="100" 
             />
           </div>
         </div>
@@ -70,6 +74,7 @@ export default function AddProductForm({
               onChange={(e) => onPriceChange(e.target.value)} 
               className="pl-10" 
               placeholder="0,00" 
+              maxLength="30"
             />
           </div>
         </div>

@@ -42,7 +42,7 @@ export default function ProductCard({ product, onToggle, onUpdate, onDelete }) {
         <CardContent className="pt-6 space-y-4">
           <div>
             <Label>Nome</Label>
-            <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+            <Input value={editName} onChange={(e) => setEditName(e.target.value)} maxLength="80" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -60,7 +60,7 @@ export default function ProductCard({ product, onToggle, onUpdate, onDelete }) {
             </div>
             <div>
               <Label>Quantidade</Label>
-              <Input type="number" value={editQuantity} onChange={(e) => setEditQuantity(e.target.value)} min="1" />
+              <Input type="number" value={editQuantity} onChange={(e) => setEditQuantity(e.target.value)} max="100" />
             </div>
           </div>
           <div>
@@ -72,6 +72,7 @@ export default function ProductCard({ product, onToggle, onUpdate, onDelete }) {
                 onChange={(e) => handleEditPriceChange(e.target.value)} 
                 className="pl-10" 
                 placeholder="0,00" 
+                maxLength="30"
               />
             </div>
           </div>
