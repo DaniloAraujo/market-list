@@ -393,6 +393,7 @@ export default function ShoppingList() {
 
             {products.length > 0 && (
               <ProductList
+                key={currentListId}
                 products={products}
                 filterCategory={filterCategory}
                 currentTab={currentTab}

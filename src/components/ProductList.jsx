@@ -1,6 +1,8 @@
-import { List, FileText, Filter, CheckSquare, Square, Eraser, Trash2, DollarSign } from 'lucide-react';
+import { useState } from 'react';
+import { List, FileText, Filter, CheckSquare, Square, Eraser, Trash2, DollarSign, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -24,9 +26,17 @@ export default function ProductList({
   onDeleteProduct,
   calculateTotal
 }) {
-  const filteredProducts = filterCategory === 'todos' ? products : products.filter(p => p.category === filterCategory);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const searchFiltered = searchQuery.trim()
+    ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase().trim()))
+    : products;
+  const filteredProducts = filterCategory === 'todos'
+    ? searchFiltered
+    : searchFiltered.filter(p => p.category === filterCategory);
   const pendingProducts = filteredProducts.filter(p => !p.collected);
   const collectedProducts = filteredProducts.filter(p => p.collected);
+  const hasSearchResults = filteredProducts.length > 0;
 
   return (
     <Tabs value={currentTab} onValueChange={onTabChange}>
@@ -117,6 +127,18 @@ export default function ProductList({
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
+              <Label>Buscar</Label>
+              <div className="relative mt-2">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar item por nome..."
+                  className="pl-9"
+                />
+              </div>
+            </div>
+            <div>
               <Label>Filtrar</Label>
               <Select value={filterCategory} onValueChange={onFilterChange}>
                 <SelectTrigger>
@@ -152,6 +174,14 @@ export default function ProductList({
             </div>
           </CardContent>
         </Card>
+
+        {searchQuery.trim() && !hasSearchResults && (
+          <Card>
+            <CardContent className="p-6 text-center text-muted-foreground">
+              Nenhum item encontrado para &quot;{searchQuery.trim()}&quot;
+            </CardContent>
+          </Card>
+        )}
         
         {pendingProducts.length > 0 && (
           <Card>
