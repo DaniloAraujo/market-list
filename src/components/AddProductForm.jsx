@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChevronDown, Lock, Plus } from 'lucide-react';
+import { ChevronDown, Lock, Plus, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DetailFields, NameField } from '@/components/form/ProductFields';
 import { centsToReais, formatBRL } from '@/utils/currencyUtils';
@@ -23,7 +23,6 @@ export default function AddProductForm({ onAdd, blockedReason, count, max }) {
   const [values, setValues] = useState(EMPTY);
   const [error, setError] = useState('');
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const nameRef = useRef(null);
   const { custom } = useCategories();
 
   const change = (patch) => setValues((v) => ({ ...v, ...patch }));
@@ -35,13 +34,12 @@ export default function AddProductForm({ onAdd, blockedReason, count, max }) {
     if (busy) return;
     if (!values.name.trim()) {
       setError('Digite o nome do produto');
-      nameRef.current?.focus();
       return;
     }
     setBusy(true);
     const accepted = await onAdd({
       name: values.name,
-      category: values.category,
+      category: activeCategory,
       quantity: Number(values.quantity) || 1,
       unitPrice: centsToReais(values.priceCents),
     });
@@ -49,10 +47,11 @@ export default function AddProductForm({ onAdd, blockedReason, count, max }) {
     if (!accepted) return;
     setValues(EMPTY);
     setError('');
-    nameRef.current?.focus();
   };
 
-  const summary = summarize(values, custom);
+  const activeCategory =
+    values.category.startsWith('c_') && !custom.some((item) => item.id === values.category) ? '' : values.category;
+  const summary = summarize({ ...values, category: activeCategory }, custom);
 
   if (blockedReason) {
     return (
@@ -68,7 +67,6 @@ export default function AddProductForm({ onAdd, blockedReason, count, max }) {
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <NameField
-            ref={nameRef}
             label={null}
             aria-label="Nome do produto"
             value={values.name}
@@ -84,21 +82,30 @@ export default function AddProductForm({ onAdd, blockedReason, count, max }) {
         </Button>
       </div>
 
-      <button
-        type="button"
-        onClick={() => setDetailsOpen((o) => !o)}
-        aria-expanded={detailsOpen}
-        className="flex w-full items-center gap-1 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-      >
-        <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', detailsOpen && 'rotate-180')} />
-        Categoria, quantidade e valor
-        {!detailsOpen && summary && <span className="ml-1 truncate text-foreground">· {summary}</span>}
+      <div className="flex items-center gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setDetailsOpen((o) => !o)}
+          aria-expanded={detailsOpen}
+          className="h-8 min-w-0 justify-start gap-1.5 px-2.5 text-xs"
+        >
+          <SlidersHorizontal className="!size-3.5 text-muted-foreground" />
+          <span className="truncate">{detailsOpen || !summary ? 'Categoria, quantidade e valor' : summary}</span>
+          <ChevronDown className={cn('!size-3.5 text-muted-foreground transition-transform', detailsOpen && 'rotate-180')} />
+        </Button>
         {max != null && (
-          <span className={cn('ml-auto tabular-nums', count >= max * 0.9 && 'font-medium text-destructive')}>
+          <span
+            className={cn(
+              'ml-auto shrink-0 text-xs tabular-nums text-muted-foreground',
+              count >= max * 0.9 && 'font-medium text-destructive'
+            )}
+          >
             {count}/{max} itens
           </span>
         )}
-      </button>
+      </div>
 
       <AnimatePresence initial={false}>
         {detailsOpen && (

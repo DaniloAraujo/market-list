@@ -6,10 +6,12 @@ import { API_ENABLED } from "@/lib/api";
 import AuthCallbackPage from "@/pages/AuthCallbackPage";
 import HomePage from "@/pages/HomePage";
 import InvitePage from "@/pages/InvitePage";
-import ProfilePage from "@/pages/ProfilePage";
 import LoginPage from "@/pages/LoginPage";
 import { ForgotPasswordPage, ResetPasswordPage } from "@/pages/PasswordPages";
 import { PrivacyPage, TermsPage } from "@/pages/LegalPages";
+import ChartsScreen from "@/screens/ChartsScreen";
+import ListScreen from "@/screens/ListScreen";
+import ProfileScreen from "@/screens/ProfileScreen";
 import VerifyEmailPage from "@/pages/VerifyEmailPage";
 
 export default function App() {
@@ -17,13 +19,16 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route element={<HomePage />}>
+            <Route index element={<ListScreen />} />
+            <Route path="graficos" element={<ChartsScreen />} />
+            <Route path="perfil" element={<ProfileScreen />} />
+          </Route>
           <Route path="/privacidade" element={<PrivacyPage />} />
           <Route path="/termos" element={<TermsPage />} />
           {API_ENABLED && (
             <>
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/perfil" element={<ProfilePage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/verify-email" element={<VerifyEmailPage />} />

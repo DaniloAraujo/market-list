@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/auth/auth-context';
-import { CategoriesContext } from '@/categories/categories-context';
-import Sidebar, { Brand } from '@/components/Sidebar';
-import Header from '@/components/Header';
+import ListSwitcher from '@/components/ListSwitcher';
 import ListHeader from '@/components/ListHeader';
 import AddProductForm from '@/components/AddProductForm';
 import ProductList from '@/components/ProductList';
@@ -15,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import ClearCartModal from '@/components/modals/ClearCartModal';
 import DeleteListsModal from '@/components/modals/DeleteListsModal';
 import LoginRequiredModal from '@/components/modals/LoginRequiredModal';
-import DeleteAccountModal from '@/components/modals/DeleteAccountModal';
+import { useStore } from '@/stores/store-context';
 
 const celebrate = async () => {
   const { default: confetti } = await import('canvas-confetti');
@@ -23,8 +21,9 @@ const celebrate = async () => {
   confetti({ particleCount: 90, spread: 70, origin: { y: 0.7 }, colors, disableForReducedMotion: true });
 };
 
-export default function ShoppingList({ store }) {
-  const { user, enabled: authEnabled, logout, deleteAccount } = useAuth();
+export default function ListScreen() {
+  const store = useStore();
+  const { user, enabled: authEnabled } = useAuth();
   const { owned, shared, currentList, products, limits, mode } = store;
 
   const role = currentList?.role ?? 'owner';
@@ -32,14 +31,12 @@ export default function ShoppingList({ store }) {
   const isOwner = role === 'owner';
   const listFull = limits && products.length >= limits.maxItemsPerList;
 
-  const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [clearOpen, setClearOpen] = useState(false);
   const [deleteListsOpen, setDeleteListsOpen] = useState(false);
   const [listsToDelete, setListsToDelete] = useState([]);
   const [shareOpen, setShareOpen] = useState(false);
   const [loginPromptOpen, setLoginPromptOpen] = useState(false);
-  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
   const collectedCount = products.filter((p) => p.collected).length;
   const allCollected = products.length > 0 && collectedCount === products.length;
@@ -105,43 +102,6 @@ export default function ShoppingList({ store }) {
     if (currentList) setShareOpen(true);
   };
 
-  const handleLogout = async () => {
-    await logout();
-    toast('Você saiu da conta.');
-  };
-
-  const handleDeleteAccount = async (confirmEmail) => {
-    await deleteAccount(confirmEmail);
-    toast('Conta excluída. Você pode reativá-la cadastrando o mesmo e-mail.');
-  };
-
-  const sidebar = (onNavigate) => (
-    <Sidebar
-      owned={owned}
-      shared={shared}
-      currentId={currentList?.id}
-      limits={limits}
-      authEnabled={authEnabled}
-      user={user}
-      onSelectList={store.selectList}
-      onCreateList={handleCreateList}
-      onDeleteLists={() => setDeleteListsOpen(true)}
-      onLogout={handleLogout}
-      onDeleteAccount={() => setDeleteAccountOpen(true)}
-      onNavigate={onNavigate}
-    />
-  );
-
-  const categoriesValue = useMemo(
-    () => ({
-      custom: store.categories,
-      create: store.createCategory,
-      remove: store.deleteCategory,
-      maxCustom: limits?.maxCategoriesPerList ?? 20,
-    }),
-    [store.categories, store.createCategory, store.deleteCategory, limits]
-  );
-
   const blockedReason = !canEdit
     ? `Você tem acesso somente para leitura nesta lista. Só ${currentList?.owner?.name ?? 'o dono'} pode permitir edições.`
     : listFull
@@ -149,72 +109,69 @@ export default function ShoppingList({ store }) {
       : null;
 
   return (
-    <CategoriesContext.Provider value={categoriesValue}>
-    <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r bg-card lg:flex">
-        <div className="border-b p-4">
-          <Brand />
-        </div>
-        <div className="min-h-0 flex-1">{sidebar()}</div>
-      </aside>
+    <>
+      <main className="mx-auto w-full max-w-2xl space-y-5 px-4 pb-4 pt-5 sm:pt-10">
+        {!store.ready ? (
+          <p className="py-16 text-center text-sm text-muted-foreground">Carregando suas listas...</p>
+        ) : !currentList ? (
+          <div className="py-16 text-center">
+            <p className="text-sm text-muted-foreground">Você ainda não tem listas.</p>
+            <Button className="mt-4" onClick={handleCreateList}>
+              Criar minha primeira lista
+            </Button>
+          </div>
+        ) : (
+          <>
+            <ListSwitcher
+              owned={owned}
+              shared={shared}
+              currentId={currentList.id}
+              limits={limits}
+              canDelete={owned.length > (user ? 0 : 1)}
+              onSelect={store.selectList}
+              onCreate={handleCreateList}
+              onDelete={() => setDeleteListsOpen(true)}
+            />
 
-      <div className="min-w-0">
-        <Header open={menuOpen} onOpenChange={setMenuOpen}>
-          {sidebar(() => setMenuOpen(false))}
-        </Header>
+            <ListHeader
+              list={currentList}
+              readOnlyTitle={!isOwner}
+              connection={store.connection}
+              onRename={store.renameList}
+              onCommit={store.commitListName}
+              onShare={handleShare}
+            />
 
-        <main className="mx-auto w-full max-w-2xl space-y-6 px-4 pb-4 pt-6 sm:pt-12">
-          {!store.ready ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">Carregando suas listas...</p>
-          ) : !currentList ? (
-            <div className="py-16 text-center">
-              <p className="text-sm text-muted-foreground">Você ainda não tem listas.</p>
-              <Button className="mt-4" onClick={handleCreateList}>
-                Criar minha primeira lista
-              </Button>
-            </div>
-          ) : (
-            <>
-              <ListHeader
-                list={currentList}
-                readOnlyTitle={!isOwner}
-                connection={store.connection}
-                onRename={store.renameList}
-                onCommit={store.commitListName}
-                onShare={handleShare}
+            <AddProductForm
+              key={`form-${currentList.id}`}
+              onAdd={handleAdd}
+              blockedReason={blockedReason}
+              count={products.length}
+              max={limits?.maxItemsPerList}
+            />
+
+            {products.length > 0 ? (
+              <ProductList
+                key={`items-${currentList.id}`}
+                products={products}
+                readOnly={!canEdit}
+                currentUserId={user?.id}
+                onToggle={store.toggleProduct}
+                onEdit={setEditing}
+                onDelete={handleDelete}
+                onCheckAll={() => withUndo('Todos os itens marcados', () => store.setAllCollected(true))}
+                onUncheckAll={() => withUndo('Todos os itens desmarcados', () => store.setAllCollected(false))}
+                onClearPrices={() => withUndo('Valores removidos', store.clearPrices)}
+                onClear={() => setClearOpen(true)}
               />
+            ) : (
+              <EmptyState />
+            )}
 
-              <AddProductForm
-                key={`form-${currentList.id}`}
-                onAdd={handleAdd}
-                blockedReason={blockedReason}
-                count={products.length}
-                max={limits?.maxItemsPerList}
-              />
-
-              {products.length > 0 ? (
-                <ProductList
-                  key={`items-${currentList.id}`}
-                  products={products}
-                  readOnly={!canEdit}
-                  currentUserId={user?.id}
-                  onToggle={store.toggleProduct}
-                  onEdit={setEditing}
-                  onDelete={handleDelete}
-                  onCheckAll={() => withUndo('Todos os itens marcados', () => store.setAllCollected(true))}
-                  onUncheckAll={() => withUndo('Todos os itens desmarcados', () => store.setAllCollected(false))}
-                  onClearPrices={() => withUndo('Valores removidos', store.clearPrices)}
-                  onClear={() => setClearOpen(true)}
-                />
-              ) : (
-                <EmptyState />
-              )}
-
-              <TotalBar products={products} />
-            </>
-          )}
-        </main>
-      </div>
+            <TotalBar products={products} />
+          </>
+        )}
+      </main>
 
       <EditProductDialog product={editing} onSave={store.updateProduct} onClose={() => setEditing(null)} />
 
@@ -238,15 +195,6 @@ export default function ShoppingList({ store }) {
       <LoginRequiredModal open={loginPromptOpen} onOpenChange={setLoginPromptOpen} />
 
       {user && (
-        <DeleteAccountModal
-          open={deleteAccountOpen}
-          onOpenChange={setDeleteAccountOpen}
-          email={user.email}
-          onConfirm={handleDeleteAccount}
-        />
-      )}
-
-      {user && (
         <ShareDialog
           open={shareOpen}
           onOpenChange={setShareOpen}
@@ -259,7 +207,6 @@ export default function ShoppingList({ store }) {
           }}
         />
       )}
-    </div>
-    </CategoriesContext.Provider>
+    </>
   );
 }

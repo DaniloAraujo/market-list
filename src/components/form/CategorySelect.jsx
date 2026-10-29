@@ -36,7 +36,7 @@ const CategorySelect = forwardRef(({ value, onValueChange, placeholder = 'Seleci
   const colored = chosen && !chosen.isDefault;
 
   return (
-    <>
+    <div className="space-y-1.5">
       <Select value={value} onValueChange={(next) => (next === MANAGE ? setDialogOpen(true) : onValueChange(next))}>
         <SelectTrigger
           ref={ref}
@@ -72,15 +72,23 @@ const CategorySelect = forwardRef(({ value, onValueChange, placeholder = 'Seleci
           <SelectSeparator />
           <SelectItem value={MANAGE}>
             <span className="flex items-center gap-2.5 font-medium text-primary">
-              <span aria-hidden>＋</span>
-              Nova categoria…
+              <span aria-hidden>{custom.length > 0 ? '✎' : '＋'}</span>
+              {custom.length > 0 ? 'Criar ou remover categorias…' : 'Nova categoria…'}
             </span>
           </SelectItem>
         </SelectContent>
       </Select>
 
+      <button
+        type="button"
+        onClick={() => setDialogOpen(true)}
+        className="rounded text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      >
+        {custom.length > 0 ? 'Criar ou remover categorias' : 'Criar categoria'}
+      </button>
+
       <CategoriesDialog open={dialogOpen} onOpenChange={setDialogOpen} onCreated={(category) => onValueChange(category.id)} />
-    </>
+    </div>
   );
 });
 CategorySelect.displayName = 'CategorySelect';

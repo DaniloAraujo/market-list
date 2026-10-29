@@ -8,6 +8,7 @@ import Field from '@/components/form/Field';
 import PasswordInput from '@/components/PasswordInput';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useTurnstile } from '@/hooks/useTurnstile';
 import { api, googleLoginUrl } from '@/lib/api';
 
 const GoogleIcon = () => (
@@ -25,6 +26,7 @@ export default function LoginPage() {
   const { status, login } = useAuth();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
+  const turnstile = useTurnstile();
 
   const mode = params.get('mode') === 'register' ? 'register' : 'login';
   const next = safeNext(params.get('next') ?? pendingNext.get());
@@ -67,16 +69,18 @@ export default function LoginPage() {
     rememberNext();
     try {
       if (mode === 'register') {
-        const result = await api('/v1/auth/register', { method: 'POST', body: { name, email, password }, token: null });
+        const result = await turnstile.withToken((captcha) =>
+          api('/v1/auth/register', { method: 'POST', body: { name, email, password }, token: null, captcha })
+        );
         if (result.verificationRequired === false) {
-          await login(email, password);
+          await turnstile.withToken((captcha) => login(email, password, captcha));
           pendingNext.clear();
           navigate(next, { replace: true });
         } else {
           setRegisteredEmail(email);
         }
       } else {
-        await login(email, password);
+        await turnstile.withToken((captcha) => login(email, password, captcha));
         pendingNext.clear();
         navigate(next, { replace: true });
       }
@@ -92,7 +96,9 @@ export default function LoginPage() {
 
   const resend = async () => {
     try {
-      await api('/v1/auth/resend-verification', { method: 'POST', body: { email: registeredEmail || email }, token: null });
+      await turnstile.withToken((captcha) =>
+        api('/v1/auth/resend-verification', { method: 'POST', body: { email: registeredEmail || email }, token: null, captcha })
+      );
       setResent(true);
     } catch (err) {
       setError(err.message);
@@ -114,6 +120,7 @@ export default function LoginPage() {
           <Button variant="ghost" size="sm" onClick={resend} disabled={resent}>
             {resent ? 'E-mail reenviado' : 'Reenviar e-mail'}
           </Button>
+          <div ref={turnstile.containerRef} />
           {error && <p className="text-xs text-destructive">{error}</p>}
           <Button
             variant="outline"
@@ -177,6 +184,8 @@ export default function LoginPage() {
             required
           />
         </Field>
+
+        <div ref={turnstile.containerRef} />
 
         {error && (
           <p role="alert" className="text-sm text-destructive">

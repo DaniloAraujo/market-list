@@ -43,8 +43,9 @@ export function onUnauthorized(listener) {
   return () => unauthorizedListeners.delete(listener);
 }
 
-export async function api(path, { method = 'GET', body, token = tokenStorage.get() } = {}) {
+export async function api(path, { method = 'GET', body, token = tokenStorage.get(), captcha } = {}) {
   const headers = {};
+  if (captcha) headers['X-Turnstile-Token'] = captcha;
   if (token) headers.Authorization = `Bearer ${token}`;
   if (body !== undefined) headers['Content-Type'] = 'application/json';
 

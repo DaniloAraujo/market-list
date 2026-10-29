@@ -42,7 +42,8 @@ export default function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(
-    async (email, password) => startSession(await api('/v1/auth/login', { method: 'POST', body: { email, password }, token: null })),
+    async (email, password, captcha) =>
+      startSession(await api('/v1/auth/login', { method: 'POST', body: { email, password }, token: null, captcha })),
     [startSession]
   );
 

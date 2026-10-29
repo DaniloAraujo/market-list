@@ -58,6 +58,29 @@ export function resolveCategory(key, custom = []) {
   return { ...builtin, isDefault: builtin.key === DEFAULT_CATEGORY, custom: false };
 }
 
+const CHART_COLORS = {
+  green: '#22c55e',
+  red: '#ef4444',
+  amber: '#f59e0b',
+  orange: '#f97316',
+  purple: '#a855f7',
+  blue: '#3b82f6',
+  cyan: '#06b6d4',
+  pink: '#ec4899',
+  yellow: '#eab308',
+  emerald: '#10b981',
+  indigo: '#6366f1',
+  violet: '#8b5cf6',
+  rose: '#f43f5e',
+  teal: '#14b8a6',
+  sky: '#0ea5e9',
+  lime: '#84cc16',
+  fuchsia: '#d946ef',
+  stone: '#a8a29e',
+};
+
+export const categoryChartColor = (category) => CHART_COLORS[category.tone] ?? CHART_COLORS.stone;
+
 export const categoryToneClasses = (category) => (category.isDefault ? '' : TONES[category.tone]);
 
 export const getCategoryLabel = (key, custom = []) => resolveCategory(key, custom).label;

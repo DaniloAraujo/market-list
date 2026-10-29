@@ -5,6 +5,7 @@ import Field from '@/components/form/Field';
 import PasswordInput from '@/components/PasswordInput';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useTurnstile } from '@/hooks/useTurnstile';
 import { api } from '@/lib/api';
 
 export function ForgotPasswordPage() {
@@ -12,13 +13,14 @@ export function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const turnstile = useTurnstile();
 
   const submit = async (event) => {
     event.preventDefault();
     setBusy(true);
     setError('');
     try {
-      await api('/v1/auth/forgot-password', { method: 'POST', body: { email }, token: null });
+      await turnstile.withToken((captcha) => api('/v1/auth/forgot-password', { method: 'POST', body: { email }, token: null, captcha }));
       setSent(true);
     } catch (err) {
       setError(err.message);
@@ -43,6 +45,7 @@ export function ForgotPasswordPage() {
           <Field label="E-mail">
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
           </Field>
+          <div ref={turnstile.containerRef} />
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="w-full" disabled={busy}>
             {busy ? 'Enviando...' : 'Enviar link'}

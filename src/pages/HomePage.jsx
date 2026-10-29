@@ -1,22 +1,51 @@
+import { useMemo } from 'react';
+import { Outlet } from 'react-router-dom';
 import { useAuth } from '@/auth/auth-context';
+import { CategoriesContext } from '@/categories/categories-context';
+import BottomNav from '@/components/BottomNav';
 import ImportListsModal from '@/components/modals/ImportListsModal';
-import ShoppingList from '@/ShoppingList';
+import Logo from '@/components/Logo';
+import { StoreContext } from '@/stores/store-context';
 import { useCloudStore } from '@/stores/useCloudStore';
 import { useLocalStore } from '@/stores/useLocalStore';
-import Logo from '@/components/Logo';
+
+function Frame({ store, children }) {
+  const { limits } = store;
+
+  const categoriesValue = useMemo(
+    () => ({
+      custom: store.categories,
+      create: store.createCategory,
+      remove: store.deleteCategory,
+      maxCustom: limits?.maxCategoriesPerList ?? 20,
+    }),
+    [store.categories, store.createCategory, store.deleteCategory, limits]
+  );
+
+  return (
+    <StoreContext.Provider value={store}>
+      <CategoriesContext.Provider value={categoriesValue}>
+        <div className="min-h-dvh pb-[calc(var(--nav-h)+1rem)]">
+          <Outlet />
+        </div>
+        <BottomNav pending={store.products.filter((product) => !product.collected).length} />
+        {children}
+      </CategoriesContext.Provider>
+    </StoreContext.Provider>
+  );
+}
 
 function GuestHome() {
   const store = useLocalStore();
-  return <ShoppingList store={store} />;
+  return <Frame store={store} />;
 }
 
 function CloudHome({ user }) {
   const store = useCloudStore(user);
   return (
-    <>
-      <ShoppingList store={store} />
+    <Frame store={store}>
       <ImportListsModal userId={user.id} store={store} />
-    </>
+    </Frame>
   );
 }
 

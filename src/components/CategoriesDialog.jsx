@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCategories } from '@/categories/categories-context';
 import Field from '@/components/form/Field';
@@ -130,13 +130,14 @@ export default function CategoriesDialog({ open, onOpenChange, onCreated }) {
                     </span>
                     <span className="flex-1" />
                     <Button
+                      type="button"
                       variant="ghost"
-                      size="icon-sm"
-                      className="text-muted-foreground hover:text-destructive"
+                      size="sm"
+                      className="h-8 gap-1.5 px-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                       onClick={() => removeOne(item)}
                       aria-label={`Remover a categoria ${item.name}`}
                     >
-                      <X />
+                      <Trash2 /> Remover
                     </Button>
                   </li>
                 );

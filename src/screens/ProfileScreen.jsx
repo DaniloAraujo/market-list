@@ -1,14 +1,15 @@
 import { useRef, useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
-import { ArrowLeft, Camera, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Camera, LogIn, LogOut, Trash2, UserX } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/auth/auth-context';
 import Avatar from '@/components/Avatar';
 import Field from '@/components/form/Field';
-import Logo from '@/components/Logo';
+import DeleteAccountModal from '@/components/modals/DeleteAccountModal';
 import PasswordInput from '@/components/PasswordInput';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import ThemeToggle from '@/components/ThemeToggle';
 import { api } from '@/lib/api';
 import { imageToAvatar } from '@/utils/resizeImage';
 
@@ -184,31 +185,116 @@ function PasswordSection({ user, onUser }) {
   );
 }
 
-export default function ProfilePage() {
-  const { status, user, updateUser } = useAuth();
+function AppearanceSection() {
+  return (
+    <Section title="Aparência">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">Tema do aplicativo</p>
+        <ThemeToggle />
+      </div>
+    </Section>
+  );
+}
 
-  if (status === 'loading') return null;
-  if (status !== 'authed') return <Navigate to="/login?next=/perfil" replace />;
+function LegalLinks() {
+  return (
+    <p className="pt-2 text-center text-xs text-muted-foreground">
+      <Link to="/termos" className="underline-offset-4 hover:underline">
+        Termos de Uso
+      </Link>
+      {' · '}
+      <Link to="/privacidade" className="underline-offset-4 hover:underline">
+        Política de Privacidade
+      </Link>
+    </p>
+  );
+}
+
+function GuestProfile({ authEnabled }) {
+  return (
+    <>
+      <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Perfil</h1>
+      <div className="mt-6 space-y-4">
+        {authEnabled && (
+          <Section title="Você está como convidado" description="Suas listas ficam salvas só neste aparelho.">
+            <p className="mb-4 text-sm text-muted-foreground">
+              Entre para guardar as listas na nuvem, usar em qualquer aparelho e compartilhar com quem quiser.
+            </p>
+            <Button asChild className="w-full">
+              <Link to="/login?next=/perfil">
+                <LogIn /> Entrar ou criar conta
+              </Link>
+            </Button>
+          </Section>
+        )}
+        <AppearanceSection />
+        <LegalLinks />
+      </div>
+    </>
+  );
+}
+
+function AccountSection({ user }) {
+  const { logout, deleteAccount } = useAuth();
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    toast('Você saiu da conta.');
+  };
+
+  const handleDelete = async (confirmEmail) => {
+    await deleteAccount(confirmEmail);
+    toast('Conta excluída. Você pode reativá-la cadastrando o mesmo e-mail.');
+  };
 
   return (
-    <main className="mx-auto w-full max-w-lg px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <Button asChild variant="ghost" size="sm" className="-ml-2 text-muted-foreground">
-          <Link to="/">
-            <ArrowLeft /> Voltar às listas
-          </Link>
+    <Section title="Conta">
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Button type="button" variant="outline" className="flex-1" onClick={handleLogout}>
+          <LogOut /> Sair
         </Button>
-        <Logo className="h-8 w-8" />
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          onClick={() => setDeleteOpen(true)}
+        >
+          <UserX /> Excluir conta
+        </Button>
       </div>
+      <DeleteAccountModal open={deleteOpen} onOpenChange={setDeleteOpen} email={user.email} onConfirm={handleDelete} />
+    </Section>
+  );
+}
 
-      <h1 className="font-display text-2xl font-semibold tracking-tight">Meu perfil</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{user.email}</p>
+export default function ProfileScreen() {
+  const { user, updateUser, enabled } = useAuth();
 
-      <div className="mt-6 space-y-4">
-        <PhotoSection user={user} onUser={updateUser} />
-        <NameSection key={user.name} user={user} onUser={updateUser} />
-        <PasswordSection user={user} onUser={updateUser} />
-      </div>
+  return (
+    <main className="mx-auto w-full max-w-lg px-4 pb-4 pt-5 sm:pt-10">
+      {user ? (
+        <>
+          <div className="flex items-center gap-3">
+            <Avatar user={user} className="h-12 w-12 text-lg" />
+            <div className="min-w-0">
+              <h1 className="truncate font-display text-2xl font-semibold leading-tight tracking-tight">{user.name}</h1>
+              <p className="truncate text-sm text-muted-foreground">{user.email}</p>
+            </div>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            <PhotoSection user={user} onUser={updateUser} />
+            <NameSection key={user.name} user={user} onUser={updateUser} />
+            <PasswordSection user={user} onUser={updateUser} />
+            <AppearanceSection />
+            <AccountSection user={user} />
+            <LegalLinks />
+          </div>
+        </>
+      ) : (
+        <GuestProfile authEnabled={enabled} />
+      )}
     </main>
   );
 }

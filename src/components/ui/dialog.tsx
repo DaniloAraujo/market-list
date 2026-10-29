@@ -38,6 +38,10 @@ const DialogContent = React.forwardRef<
         className
       )}
       {...props}
+      onOpenAutoFocus={(event) => {
+        event.preventDefault()
+        props.onOpenAutoFocus?.(event)
+      }}
     >
       {children}
       <DialogPrimitive.Close className="absolute right-4 top-4 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
