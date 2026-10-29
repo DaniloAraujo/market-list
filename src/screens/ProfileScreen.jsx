@@ -1,47 +1,34 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, LogIn, LogOut, Sparkles, Trash2, UserX } from 'lucide-react';
+import { Camera, KeyRound, LogIn, LogOut, Mail, Palette, Sparkles, User, UserRound, UserX } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/auth/auth-context';
 import Avatar from '@/components/Avatar';
-import Field from '@/components/form/Field';
 import DeleteAccountModal from '@/components/modals/DeleteAccountModal';
-import PasswordInput from '@/components/PasswordInput';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import ChangePasswordDialog from '@/components/profile/ChangePasswordDialog';
+import EditNameDialog from '@/components/profile/EditNameDialog';
+import { SettingsGroup, SettingsRow } from '@/components/profile/SettingsList';
 import ThemeToggle from '@/components/ThemeToggle';
 import { api } from '@/lib/api';
 import { CONTACT_EMAIL } from '@/lib/contact';
 import { imageToAvatar } from '@/utils/resizeImage';
 
-function Section({ title, description, children }) {
-  return (
-    <section className="rounded-xl border bg-card p-5">
-      <h2 className="font-display text-base font-semibold tracking-tight">{title}</h2>
-      {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
-      <div className="mt-4">{children}</div>
-    </section>
-  );
-}
-
-function PhotoSection({ user, onUser }) {
+function ProfileHeader({ user, onUser }) {
   const inputRef = useRef(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
 
   const upload = async (event) => {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
     setBusy(true);
-    setError('');
     try {
       const image = await imageToAvatar(file);
       const { user: updated } = await api('/v1/me/avatar', { method: 'PUT', body: { image } });
       onUser(updated);
       toast.success('Foto atualizada.');
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setBusy(false);
     }
@@ -49,157 +36,62 @@ function PhotoSection({ user, onUser }) {
 
   const remove = async () => {
     setBusy(true);
-    setError('');
     try {
       const { user: updated } = await api('/v1/me/avatar', { method: 'DELETE' });
       onUser(updated);
       toast.success('Foto removida.');
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <Section title="Foto de perfil" description="Aparece para quem compartilha listas com você.">
-      <div className="flex items-center gap-4">
-        <Avatar user={user} className="h-20 w-20 text-2xl" />
-        <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
-            <Camera /> {busy ? 'Enviando...' : 'Escolher foto'}
-          </Button>
-          {user.avatarUrl && (
-            <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={remove}>
-              <Trash2 /> Remover
-            </Button>
-          )}
-        </div>
-        <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={upload} />
-      </div>
-      {error && (
-        <p role="alert" className="mt-3 text-sm text-destructive">
-          {error}
-        </p>
+    <header className="flex flex-col items-center text-center">
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={busy}
+        aria-label="Alterar foto de perfil"
+        className="group relative rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60"
+      >
+        <Avatar user={user} className="h-24 w-24 text-3xl" />
+        <span className="absolute bottom-0 right-0 grid h-8 w-8 place-content-center rounded-full border-2 border-background bg-primary text-primary-foreground transition-transform group-hover:scale-105">
+          <Camera className="h-4 w-4" />
+        </span>
+      </button>
+      <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={upload} />
+
+      <h1 className="mt-4 max-w-full truncate font-display text-2xl font-semibold tracking-tight">{user.name}</h1>
+      <p className="max-w-full truncate text-sm text-muted-foreground">{user.email}</p>
+      {user.avatarUrl && (
+        <button
+          type="button"
+          onClick={remove}
+          disabled={busy}
+          className="mt-2 rounded text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-60"
+        >
+          Remover foto
+        </button>
       )}
-    </Section>
+    </header>
   );
 }
 
-function NameSection({ user, onUser }) {
-  const [name, setName] = useState(user.name);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const changed = name.trim() !== user.name && name.trim() !== '';
-
-  const submit = async (event) => {
-    event.preventDefault();
-    setBusy(true);
-    setError('');
-    try {
-      const { user: updated } = await api('/v1/me', { method: 'PATCH', body: { name: name.trim() } });
-      onUser(updated);
-      toast.success('Nome atualizado.');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  };
-
+function AppearanceGroup() {
   return (
-    <Section title="Nome">
-      <form onSubmit={submit} className="space-y-4" noValidate>
-        <Field label="Como você quer ser chamado" error={error}>
-          <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={80} autoComplete="name" />
-        </Field>
-        <Button type="submit" size="sm" disabled={busy || !changed}>
-          {busy ? 'Salvando...' : 'Salvar nome'}
-        </Button>
-      </form>
-    </Section>
-  );
-}
-
-function PasswordSection({ user, onUser }) {
-  const [current, setCurrent] = useState('');
-  const [next, setNext] = useState('');
-  const [confirm, setConfirm] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [errors, setErrors] = useState({});
-
-  const submit = async (event) => {
-    event.preventDefault();
-    const found = {};
-    if (user.hasPassword && !current) found.current = 'Informe a senha atual.';
-    if (next.length < 8) found.next = 'A nova senha precisa ter pelo menos 8 caracteres.';
-    if (next !== confirm) found.confirm = 'As senhas não são iguais.';
-    setErrors(found);
-    if (Object.keys(found).length) return;
-
-    setBusy(true);
-    try {
-      const { user: updated } = await api('/v1/me/password', {
-        method: 'POST',
-        body: { currentPassword: user.hasPassword ? current : undefined, newPassword: next },
-      });
-      onUser(updated);
-      setCurrent('');
-      setNext('');
-      setConfirm('');
-      toast.success(user.hasPassword ? 'Senha alterada. Os outros aparelhos foram desconectados.' : 'Senha definida.');
-    } catch (err) {
-      const field = err.details?.[0]?.field;
-      const message = err.details?.[0]?.message ?? err.message;
-      setErrors(field === 'currentPassword' ? { current: message } : { next: message });
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <Section
-      title={user.hasPassword ? 'Alterar senha' : 'Definir senha'}
-      description={
-        user.hasPassword
-          ? 'Ao trocar, os outros aparelhos conectados saem da sua conta.'
-          : 'Você entra com o Google. Defina uma senha para também poder entrar com e-mail e senha.'
-      }
-    >
-      <form onSubmit={submit} className="space-y-4" noValidate>
-        {user.hasPassword && (
-          <Field label="Senha atual" error={errors.current}>
-            <PasswordInput value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="current-password" />
-          </Field>
-        )}
-        <Field label="Nova senha" error={errors.next}>
-          <PasswordInput value={next} onChange={(e) => setNext(e.target.value)} autoComplete="new-password" />
-        </Field>
-        <Field label="Repita a nova senha" error={errors.confirm}>
-          <PasswordInput value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" />
-        </Field>
-        <Button type="submit" size="sm" disabled={busy}>
-          {busy ? 'Salvando...' : user.hasPassword ? 'Alterar senha' : 'Definir senha'}
-        </Button>
-      </form>
-    </Section>
-  );
-}
-
-function AppearanceSection() {
-  return (
-    <Section title="Aparência">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">Tema do aplicativo</p>
+    <SettingsGroup title="Preferências">
+      <SettingsRow icon={Palette} label="Aparência">
         <ThemeToggle />
-      </div>
-    </Section>
+      </SettingsRow>
+    </SettingsGroup>
   );
 }
 
-function LegalLinks() {
+function Footer() {
   return (
-    <footer className="space-y-3 pt-4 text-center text-xs text-muted-foreground">
+    <footer className="space-y-3 pt-2 text-center text-xs text-muted-foreground">
       <p className="flex items-center justify-center gap-1.5">
         <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
         Em breve, novidades por aqui.
@@ -227,29 +119,36 @@ function LegalLinks() {
 function GuestProfile({ authEnabled }) {
   return (
     <>
-      <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Perfil</h1>
-      <div className="mt-6 space-y-4">
+      <header className="flex flex-col items-center text-center">
+        <span className="grid h-24 w-24 place-content-center rounded-full bg-muted text-muted-foreground">
+          <UserRound className="h-10 w-10" aria-hidden="true" />
+        </span>
+        <h1 className="mt-4 font-display text-2xl font-semibold tracking-tight">Convidado</h1>
+        <p className="text-sm text-muted-foreground">Suas listas ficam salvas só neste aparelho.</p>
+      </header>
+
+      <div className="mt-8 space-y-6">
         {authEnabled && (
-          <Section title="Você está como convidado" description="Suas listas ficam salvas só neste aparelho.">
-            <p className="mb-4 text-sm text-muted-foreground">
-              Entre para guardar as listas na nuvem, usar em qualquer aparelho e compartilhar com quem quiser.
-            </p>
-            <Button asChild className="w-full">
-              <Link to="/login?next=/perfil">
-                <LogIn /> Entrar ou criar conta
-              </Link>
-            </Button>
-          </Section>
+          <SettingsGroup>
+            <SettingsRow icon={LogIn} label="Entrar ou criar conta" to="/login?next=/perfil" accent />
+          </SettingsGroup>
         )}
-        <AppearanceSection />
-        <LegalLinks />
+        {authEnabled && (
+          <p className="-mt-3 px-1 text-xs text-muted-foreground">
+            Com uma conta você guarda as listas na nuvem, usa em qualquer aparelho e compartilha com quem quiser.
+          </p>
+        )}
+        <AppearanceGroup />
+        <Footer />
       </div>
     </>
   );
 }
 
-function AccountSection({ user }) {
+function AccountProfile({ user, onUser }) {
   const { logout, deleteAccount } = useAuth();
+  const [nameOpen, setNameOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -263,22 +162,35 @@ function AccountSection({ user }) {
   };
 
   return (
-    <Section title="Conta">
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Button type="button" variant="outline" className="flex-1" onClick={handleLogout}>
-          <LogOut /> Sair
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="flex-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
-          onClick={() => setDeleteOpen(true)}
-        >
-          <UserX /> Excluir conta
-        </Button>
+    <>
+      <ProfileHeader user={user} onUser={onUser} />
+
+      <div className="mt-8 space-y-6">
+        <SettingsGroup title="Conta">
+          <SettingsRow icon={User} label="Nome" value={user.name} onClick={() => setNameOpen(true)} />
+          <SettingsRow icon={Mail} label="E-mail" value={user.email} />
+          <SettingsRow
+            icon={KeyRound}
+            label="Senha"
+            value={user.hasPassword ? '••••••••' : 'Não definida'}
+            onClick={() => setPasswordOpen(true)}
+          />
+        </SettingsGroup>
+
+        <AppearanceGroup />
+
+        <SettingsGroup>
+          <SettingsRow icon={LogOut} label="Sair" onClick={handleLogout} chevron={false} />
+          <SettingsRow icon={UserX} label="Excluir conta" onClick={() => setDeleteOpen(true)} destructive chevron={false} />
+        </SettingsGroup>
+
+        <Footer />
       </div>
+
+      <EditNameDialog open={nameOpen} onOpenChange={setNameOpen} user={user} onUser={onUser} />
+      <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} user={user} onUser={onUser} />
       <DeleteAccountModal open={deleteOpen} onOpenChange={setDeleteOpen} email={user.email} onConfirm={handleDelete} />
-    </Section>
+    </>
   );
 }
 
@@ -286,29 +198,8 @@ export default function ProfileScreen() {
   const { user, updateUser, enabled } = useAuth();
 
   return (
-    <main className="mx-auto w-full max-w-lg px-4 pb-4 pt-5 sm:pt-10">
-      {user ? (
-        <>
-          <div className="flex items-center gap-3">
-            <Avatar user={user} className="h-12 w-12 text-lg" />
-            <div className="min-w-0">
-              <h1 className="truncate font-display text-2xl font-semibold leading-tight tracking-tight">{user.name}</h1>
-              <p className="truncate text-sm text-muted-foreground">{user.email}</p>
-            </div>
-          </div>
-
-          <div className="mt-6 space-y-4">
-            <PhotoSection user={user} onUser={updateUser} />
-            <NameSection key={user.name} user={user} onUser={updateUser} />
-            <PasswordSection user={user} onUser={updateUser} />
-            <AppearanceSection />
-            <AccountSection user={user} />
-            <LegalLinks />
-          </div>
-        </>
-      ) : (
-        <GuestProfile authEnabled={enabled} />
-      )}
+    <main className="mx-auto w-full max-w-lg px-4 pb-6 pt-8 sm:pt-12">
+      {user ? <AccountProfile user={user} onUser={updateUser} /> : <GuestProfile authEnabled={enabled} />}
     </main>
   );
 }
