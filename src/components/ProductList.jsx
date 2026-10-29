@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import ProductItem from '@/components/ProductItem';
 import { useCategories } from '@/categories/categories-context';
-import { categoryToneClasses, resolveCategory } from '@/utils/categoryUtils';
+import { resolveCategory } from '@/utils/categoryUtils';
 import { cn } from '@/lib/utils';
 
 const groupByCategory = (items, custom) => {
@@ -29,23 +29,6 @@ const groupByCategory = (items, custom) => {
   });
 };
 
-function GroupHeading({ info, count }) {
-  return (
-    <li className="flex items-center gap-2 pb-1 pt-4 first:pt-3">
-      <span
-        className={cn(
-          'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium',
-          info.isDefault ? 'bg-muted text-muted-foreground' : categoryToneClasses(info)
-        )}
-      >
-        <span aria-hidden>{info.emoji}</span>
-        {info.label}
-      </span>
-      <span className="text-[11px] tabular-nums text-muted-foreground">{count}</span>
-    </li>
-  );
-}
-
 function Section({ title, groups, count, renderItem }) {
   return (
     <section>
@@ -55,10 +38,7 @@ function Section({ title, groups, count, renderItem }) {
       </h2>
       <ul>
         <AnimatePresence mode="popLayout" initial={false}>
-          {groups.flatMap((group) => [
-            <GroupHeading key={`${title}-${group.key}`} info={group.info} count={group.items.length} />,
-            ...group.items.map(renderItem),
-          ])}
+          {groups.flatMap((group) => group.items.map(renderItem))}
         </AnimatePresence>
       </ul>
     </section>

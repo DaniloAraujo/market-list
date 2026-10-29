@@ -1,13 +1,17 @@
 import { forwardRef } from 'react';
 import { motion } from 'motion/react';
 import { Check, X } from 'lucide-react';
+import { useCategories } from '@/categories/categories-context';
+import { categoryToneClasses, resolveCategory } from '@/utils/categoryUtils';
 import { formatBRL } from '@/utils/currencyUtils';
 import { cn } from '@/lib/utils';
 
 const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete, readOnly = false, currentUserId }, ref) => {
-  const { name, quantity, unitPrice, collected, updatedBy, note } = product;
+  const { name, category, quantity, unitPrice, collected, updatedBy, note } = product;
   const editedByOther = updatedBy && updatedBy.id !== currentUserId ? updatedBy.name : null;
   const hasPrice = unitPrice > 0;
+  const { custom } = useCategories();
+  const chosen = resolveCategory(category, custom);
   const details = [
     quantity > 1 ? `${quantity} un.` : null,
     hasPrice && quantity > 1 ? `× ${formatBRL(unitPrice)}` : null,
@@ -59,7 +63,22 @@ const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete, readOnly 
         >
           {name}
         </span>
-        {details && <span className="mt-1 block truncate text-xs text-muted-foreground">{details}</span>}
+        {(!chosen.isDefault || details) && (
+          <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            {!chosen.isDefault && (
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium',
+                  categoryToneClasses(chosen)
+                )}
+              >
+                <span aria-hidden>{chosen.emoji}</span>
+                {chosen.label}
+              </span>
+            )}
+            {details && <span className="truncate">{details}</span>}
+          </span>
+        )}
         {note && (
           <span className="mt-1 line-clamp-2 block whitespace-pre-line break-words text-xs text-muted-foreground">{note}</span>
         )}
