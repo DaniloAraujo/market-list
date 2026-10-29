@@ -1,35 +1,92 @@
-import { forwardRef } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import CategoryIcon from '@/components/CategoryIcon';
-import { CATEGORIES, getCategoryLabel } from '@/utils/categoryUtils';
+import { forwardRef, useState } from 'react';
+import { useCategories } from '@/categories/categories-context';
+import CategoriesDialog from '@/components/CategoriesDialog';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { BUILTIN_CATEGORIES, DEFAULT_CATEGORY, categoryToneClasses, resolveCategory } from '@/utils/categoryUtils';
+import { cn } from '@/lib/utils';
 
-function CategoryOption({ category }) {
+const MANAGE = '__manage__';
+
+function Option({ category }) {
   return (
     <span className="flex items-center gap-2.5">
-      <CategoryIcon category={category} className="h-4 w-4 text-muted-foreground" />
-      {getCategoryLabel(category)}
+      <span aria-hidden>{category.emoji}</span>
+      {category.label}
     </span>
   );
 }
 
-/** Select de categorias com ícone. `categories` limita as opções (ex.: filtro). */
-const CategorySelect = forwardRef(
-  ({ value, onValueChange, categories = CATEGORIES, placeholder = 'Selecione', allLabel, ...props }, ref) => (
-    <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger ref={ref} {...props}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {allLabel && <SelectItem value="todos">{allLabel}</SelectItem>}
-        {categories.map((cat) => (
-          <SelectItem key={cat} value={cat}>
-            <CategoryOption category={cat} />
+const builtins = BUILTIN_CATEGORIES.filter((c) => c.key !== DEFAULT_CATEGORY);
+const fallback = BUILTIN_CATEGORIES.find((c) => c.key === DEFAULT_CATEGORY);
+
+/**
+ * Seletor de categoria. A cor aparece só depois que uma categoria é escolhida ("Outros" fica neutro).
+ * O último item abre o diálogo para criar categorias próprias, com emoji.
+ */
+const CategorySelect = forwardRef(({ value, onValueChange, placeholder = 'Selecione', ...props }, ref) => {
+  const { custom } = useCategories();
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const chosen = value ? resolveCategory(value, custom) : null;
+  const colored = chosen && !chosen.isDefault;
+
+  return (
+    <>
+      <Select value={value} onValueChange={(next) => (next === MANAGE ? setDialogOpen(true) : onValueChange(next))}>
+        <SelectTrigger
+          ref={ref}
+          {...props}
+          className={cn(colored && ['border-transparent font-medium', categoryToneClasses(chosen)], props.className)}
+        >
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {builtins.map((category) => (
+            <SelectItem key={category.key} value={category.key}>
+              <Option category={category} />
+            </SelectItem>
+          ))}
+          <SelectItem value={fallback.key}>
+            <Option category={fallback} />
           </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )
-);
+
+          {custom.length > 0 && (
+            <>
+              <SelectSeparator />
+              <SelectGroup>
+                <SelectLabel>Suas categorias</SelectLabel>
+                {custom.map((item) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    <Option category={resolveCategory(item.id, custom)} />
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </>
+          )}
+
+          <SelectSeparator />
+          <SelectItem value={MANAGE}>
+            <span className="flex items-center gap-2.5 font-medium text-primary">
+              <span aria-hidden>＋</span>
+              Nova categoria…
+            </span>
+          </SelectItem>
+        </SelectContent>
+      </Select>
+
+      <CategoriesDialog open={dialogOpen} onOpenChange={setDialogOpen} onCreated={(category) => onValueChange(category.id)} />
+    </>
+  );
+});
 CategorySelect.displayName = 'CategorySelect';
 
 export default CategorySelect;

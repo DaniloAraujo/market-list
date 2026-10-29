@@ -67,8 +67,15 @@ export default function LoginPage() {
     rememberNext();
     try {
       if (mode === 'register') {
-        await api('/v1/auth/register', { method: 'POST', body: { name, email, password }, token: null });
-        setRegisteredEmail(email);
+        const result = await api('/v1/auth/register', { method: 'POST', body: { name, email, password }, token: null });
+        if (result.verificationRequired === false) {
+          // A API não exige confirmar o e-mail: a conta já está pronta, então entra direto.
+          await login(email, password);
+          pendingNext.clear();
+          navigate(next, { replace: true });
+        } else {
+          setRegisteredEmail(email);
+        }
       } else {
         await login(email, password);
         pendingNext.clear();

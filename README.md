@@ -1,6 +1,6 @@
 # Tá na Lista
 
-A modern, feature-rich shopping list application built with React and Vite. Manage multiple shopping lists, track products with categories and prices, and share lists with others.
+A modern list app built with React and Vite. Make lists for groceries, home, trips, work or anything else, organise items with categories (including your own, with emoji) and prices, and share lists with others in real time.
 
 ## Features
 

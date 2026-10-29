@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export const STORAGE_KEY = 'shoppingLists';
 
+const MAX_CATEGORIES = 20;
+
 const newId = () => `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
 
 const makeList = (name, products = []) => ({ id: newId(), name, products, createdAt: Date.now() });
@@ -111,6 +113,38 @@ export function useShoppingLists() {
     [lists, currentListId]
   );
 
+  const categories = useMemo(() => currentList?.categories ?? [], [currentList]);
+
+  const addCategory = useCallback(
+    ({ name, emoji }) => {
+      const current = lists.find((l) => l.id === listId)?.categories ?? [];
+      const trimmed = name.trim();
+      if (current.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) {
+        throw new Error('Esta lista já tem uma categoria com esse nome.');
+      }
+      if (current.length >= MAX_CATEGORIES) {
+        throw new Error(`Esta lista já tem ${MAX_CATEGORIES} categorias próprias. Exclua uma para criar outra.`);
+      }
+      const category = { id: `c_${newId()}`, name: trimmed, emoji: emoji.trim() };
+      setLists((prev) => mapList(prev, listId, (l) => ({ ...l, categories: [...(l.categories ?? []), category] })));
+      return category;
+    },
+    [lists, listId]
+  );
+
+  // Os itens que usavam a categoria voltam para "outros".
+  const removeCategory = useCallback(
+    (categoryId) =>
+      setLists((prev) =>
+        mapList(prev, listId, (l) => ({
+          ...l,
+          categories: (l.categories ?? []).filter((c) => c.id !== categoryId),
+          products: l.products.map((p) => (p.category === categoryId ? { ...p, category: 'outros' } : p)),
+        }))
+      ),
+    [listId]
+  );
+
   const addProduct = useCallback(
     ({ name, category, quantity, unitPrice }) =>
       updateProducts((items) => [
@@ -171,6 +205,9 @@ export function useShoppingLists() {
     deleteLists,
     addProduct,
     updateProduct,
+    categories,
+    addCategory,
+    removeCategory,
     toggleProduct,
     removeProduct,
     restoreProducts,

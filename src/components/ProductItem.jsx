@@ -1,8 +1,8 @@
 import { forwardRef } from 'react';
 import { motion } from 'motion/react';
 import { Check, X } from 'lucide-react';
-import CategoryIcon from '@/components/CategoryIcon';
-import { getCategoryLabel } from '@/utils/categoryUtils';
+import { useCategories } from '@/categories/categories-context';
+import { categoryToneClasses, resolveCategory } from '@/utils/categoryUtils';
 import { formatBRL } from '@/utils/currencyUtils';
 import { cn } from '@/lib/utils';
 
@@ -11,6 +11,15 @@ const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete, readOnly 
   // Em listas compartilhadas, mostra quem mexeu por último quando não foi a própria pessoa.
   const editedByOther = updatedBy && updatedBy.id !== currentUserId ? updatedBy.name : null;
   const hasPrice = unitPrice > 0;
+  const { custom } = useCategories();
+  const chosen = resolveCategory(category, custom);
+  const details = [
+    quantity > 1 ? `${quantity} un.` : null,
+    hasPrice && quantity > 1 ? `× ${formatBRL(unitPrice)}` : null,
+    editedByOther ? `por ${editedByOther}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <motion.li
@@ -55,15 +64,22 @@ const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete, readOnly 
         >
           {name}
         </span>
-        <span className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <CategoryIcon category={category} className="h-3 w-3" />
-          <span className="truncate">
-            {getCategoryLabel(category)}
-            {quantity > 1 && ` · ${quantity} un.`}
-            {hasPrice && quantity > 1 && ` × ${formatBRL(unitPrice)}`}
-            {editedByOther && ` · por ${editedByOther}`}
+        {(!chosen.isDefault || details) && (
+          <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            {!chosen.isDefault && (
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium',
+                  categoryToneClasses(chosen)
+                )}
+              >
+                <span aria-hidden>{chosen.emoji}</span>
+                {chosen.label}
+              </span>
+            )}
+            {details && <span className="truncate">{details}</span>}
           </span>
-        </span>
+        )}
       </button>
 
       {hasPrice && (

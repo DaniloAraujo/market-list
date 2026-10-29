@@ -4,14 +4,15 @@ import { ChevronDown, Lock, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DetailFields, NameField } from '@/components/form/ProductFields';
 import { centsToReais, formatBRL } from '@/utils/currencyUtils';
+import { useCategories } from '@/categories/categories-context';
 import { getCategoryLabel } from '@/utils/categoryUtils';
 import { cn } from '@/lib/utils';
 
 const EMPTY = { name: '', category: '', quantity: 1, priceCents: '' };
 
-const summarize = ({ category, quantity, priceCents }) =>
+const summarize = ({ category, quantity, priceCents }, custom) =>
   [
-    category ? getCategoryLabel(category) : null,
+    category ? getCategoryLabel(category, custom) : null,
     quantity > 1 ? `${quantity} un.` : null,
     priceCents ? formatBRL(centsToReais(priceCents)) : null,
   ]
@@ -28,6 +29,7 @@ export default function AddProductForm({ onAdd, blockedReason, count, max }) {
   const [error, setError] = useState('');
   const [detailsOpen, setDetailsOpen] = useState(false);
   const nameRef = useRef(null);
+  const { custom } = useCategories();
 
   const change = (patch) => setValues((v) => ({ ...v, ...patch }));
 
@@ -55,7 +57,7 @@ export default function AddProductForm({ onAdd, blockedReason, count, max }) {
     nameRef.current?.focus();
   };
 
-  const summary = summarize(values);
+  const summary = summarize(values, custom);
 
   if (blockedReason) {
     return (

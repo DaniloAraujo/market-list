@@ -30,6 +30,8 @@ const toApiFields = (fields) => {
   return body;
 };
 
+const NO_CATEGORIES = [];
+
 const EDITABLE = ['name', 'category', 'quantity', 'unitPrice', 'collected'];
 
 const readSavedCurrent = (userId) => {
@@ -55,6 +57,7 @@ export function useCloudStore(user) {
   const [ready, setReady] = useState(false);
   const [preferredId, setPreferredId] = useState(() => readSavedCurrent(user.id));
   const [itemsByList, setItemsByList] = useState({});
+  const [categoriesByList, setCategoriesByList] = useState({});
   const [connection, setConnection] = useState('connecting');
   const [membersVersion, setMembersVersion] = useState(0);
 
@@ -90,14 +93,16 @@ export function useCloudStore(user) {
     const name = [...latest.current.lists.owned, ...latest.current.lists.shared].find((l) => l.id === listId)?.name;
     setLists((prev) => ({ owned: remove(prev.owned), shared: remove(prev.shared) }));
     setItemsByList(({ [listId]: _removed, ...rest }) => rest);
+    setCategoriesByList(({ [listId]: _removed, ...rest }) => rest);
     if (reason) toast(name ? `${GONE_MESSAGES[reason]} (${name})` : GONE_MESSAGES[reason]);
   }, []);
 
   const loadList = useCallback(
     async (listId) => {
       try {
-        const { list, items } = await api(`/v1/lists/${listId}`);
+        const { list, items, categories } = await api(`/v1/lists/${listId}`);
         setItemsByList((prev) => ({ ...prev, [listId]: items.map(toProduct) }));
+        setCategoriesByList((prev) => ({ ...prev, [listId]: categories ?? [] }));
         patchSummary(list);
       } catch (error) {
         if (error.status === 404) dropList(listId, 'removed');
@@ -137,6 +142,22 @@ export function useCloudStore(user) {
 
   const setItems = useCallback((listId, items) => setItemsByList((prev) => ({ ...prev, [listId]: items })), []);
 
+  const addCategoryToState = useCallback((listId, category) => {
+    setCategoriesByList((prev) => {
+      const current = prev[listId] ?? [];
+      return current.some((c) => c.id === category.id) ? prev : { ...prev, [listId]: [...current, category] };
+    });
+  }, []);
+
+  // Os itens da categoria removida voltam para "outros" (o servidor faz o mesmo).
+  const removeCategoryFromState = useCallback((listId, categoryId) => {
+    setCategoriesByList((prev) => ({ ...prev, [listId]: (prev[listId] ?? []).filter((c) => c.id !== categoryId) }));
+    setItemsByList((prev) => ({
+      ...prev,
+      [listId]: (prev[listId] ?? []).map((p) => (p.category === categoryId ? { ...p, category: 'outros' } : p)),
+    }));
+  }, []);
+
   const handleEvent = useCallback(
     (event, listId) => {
       switch (event.type) {
@@ -149,6 +170,12 @@ export function useCloudStore(user) {
           break;
         case 'items.bulk':
           setItems(listId, event.items.map(toProduct));
+          break;
+        case 'category.created':
+          addCategoryToState(listId, event.category);
+          break;
+        case 'category.deleted':
+          removeCategoryFromState(listId, event.categoryId);
           break;
         case 'list.updated': {
           // Não sobrescreve o nome enquanto a própria pessoa o está digitando.
@@ -169,7 +196,7 @@ export function useCloudStore(user) {
           break;
       }
     },
-    [upsert, setItems, patchSummary, loadList, refreshLists, user.id]
+    [upsert, setItems, patchSummary, loadList, refreshLists, addCategoryToState, removeCategoryFromState, user.id]
   );
 
   useListSocket(currentId, {
@@ -322,6 +349,25 @@ export function useCloudStore(user) {
     [setItems, loadList]
   );
 
+  const createCategory = useCallback(
+    async (input) => {
+      const listId = latest.current.currentId;
+      const { category } = await api(`/v1/lists/${listId}/categories`, { method: 'POST', body: input });
+      addCategoryToState(listId, category);
+      return category;
+    },
+    [addCategoryToState]
+  );
+
+  const deleteCategory = useCallback(
+    async (categoryId) => {
+      const listId = latest.current.currentId;
+      await api(`/v1/lists/${listId}/categories/${categoryId}`, { method: 'DELETE' });
+      removeCategoryFromState(listId, categoryId);
+    },
+    [removeCategoryFromState]
+  );
+
   // --- Ações sobre listas ---------------------------------------------------------------
 
   const createList = useCallback(async () => {
@@ -397,6 +443,9 @@ export function useCloudStore(user) {
     membersVersion,
     currentList,
     products: itemsByList[currentId] ?? [],
+    categories: categoriesByList[currentId] ?? NO_CATEGORIES,
+    createCategory,
+    deleteCategory,
     selectList: setPreferredId,
     createList,
     renameList,

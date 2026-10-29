@@ -3,13 +3,13 @@ import { Eye, LogOut, MoreHorizontal, Pencil, Plus, Trash2, UserX } from 'lucide
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ThemeToggle from '@/components/ThemeToggle';
-import logo from '@/assets/logo_ta-na-lista-not-name.png';
+import Logo from '@/components/Logo';
 import { cn } from '@/lib/utils';
 
 export function Brand() {
   return (
     <div className="flex items-center gap-2.5">
-      <img src={logo} alt="" className="h-8 w-8 object-contain" />
+      <Logo className="h-8 w-8" />
       <p className="font-display text-base font-semibold tracking-tight">Tá na Lista</p>
     </div>
   );

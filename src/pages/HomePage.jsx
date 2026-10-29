@@ -3,7 +3,7 @@ import ImportListsModal from '@/components/modals/ImportListsModal';
 import ShoppingList from '@/ShoppingList';
 import { useCloudStore } from '@/stores/useCloudStore';
 import { useLocalStore } from '@/stores/useLocalStore';
-import logo from '@/assets/logo_ta-na-lista-not-name.png';
+import Logo from '@/components/Logo';
 
 function GuestHome() {
   const store = useLocalStore();
@@ -26,7 +26,7 @@ export default function HomePage() {
   if (status === 'loading') {
     return (
       <div className="grid min-h-dvh place-content-center">
-        <img src={logo} alt="Carregando" className="h-16 w-16 animate-pulse object-contain" />
+        <Logo title="Carregando" className="h-16 w-16 animate-pulse" />
       </div>
     );
   }

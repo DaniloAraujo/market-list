@@ -71,7 +71,7 @@ function InviteSection({ listId, invites, onChanged }) {
     }
   };
 
-  const nativeShare = () => navigator.share({ title: 'Lista de mercado', text: 'Convite para uma lista no Tá na Lista', url: link }).catch(() => {});
+  const nativeShare = () => navigator.share({ title: 'Lista no Tá na Lista', text: 'Convite para uma lista no Tá na Lista', url: link }).catch(() => {});
 
   const revoke = async (id) => {
     try {
@@ -111,7 +111,7 @@ function InviteSection({ listId, invites, onChanged }) {
       {link ? (
         <div className="space-y-2">
           <div className="flex gap-2">
-            <Input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Link de convite" className="text-sm" />
+            <Input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Link de convite" className="text-base md:text-sm" />
             <Button variant="outline" size="icon" onClick={copy} aria-label="Copiar link">
               {copied ? <Check /> : <Copy />}
             </Button>

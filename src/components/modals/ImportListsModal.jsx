@@ -65,6 +65,7 @@ export default function ImportListsModal({ userId, store }) {
       const body = {
         lists: lists.map((l) => ({
           name: (l.name || 'Minha lista').trim().slice(0, 80),
+          categories: (l.categories ?? []).map((c) => ({ key: c.id, name: c.name, emoji: c.emoji })),
           items: l.products.map(toImportItem).filter((item) => item.name),
         })),
       };

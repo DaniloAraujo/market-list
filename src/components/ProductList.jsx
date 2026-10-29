@@ -11,8 +11,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ProductItem from '@/components/ProductItem';
-import CategoryIcon from '@/components/CategoryIcon';
-import { getCategoryLabel } from '@/utils/categoryUtils';
+import { useCategories } from '@/categories/categories-context';
+import { resolveCategory } from '@/utils/categoryUtils';
 import { cn } from '@/lib/utils';
 
 function Section({ title, count, children }) {
@@ -61,6 +61,7 @@ export default function ProductList({
 }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('todos');
+  const { custom } = useCategories();
 
   const categories = useMemo(() => [...new Set(products.map((p) => p.category))], [products]);
   const activeCategory = category === 'todos' || categories.includes(category) ? category : 'todos';
@@ -142,12 +143,15 @@ export default function ProductList({
             <CategoryChip active={activeCategory === 'todos'} onClick={() => setCategory('todos')}>
               Todos
             </CategoryChip>
-            {categories.map((cat) => (
-              <CategoryChip key={cat} active={activeCategory === cat} onClick={() => setCategory(cat)}>
-                <CategoryIcon category={cat} className="h-3.5 w-3.5" />
-                {getCategoryLabel(cat)}
-              </CategoryChip>
-            ))}
+            {categories.map((cat) => {
+              const info = resolveCategory(cat, custom);
+              return (
+                <CategoryChip key={cat} active={activeCategory === cat} onClick={() => setCategory(cat)}>
+                  <span aria-hidden>{info.emoji}</span>
+                  {info.label}
+                </CategoryChip>
+              );
+            })}
           </div>
         )}
       </div>

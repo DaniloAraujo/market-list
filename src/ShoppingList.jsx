@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/auth/auth-context';
+import { CategoriesContext } from '@/categories/categories-context';
 import Sidebar, { Brand } from '@/components/Sidebar';
 import Header from '@/components/Header';
 import ListHeader from '@/components/ListHeader';
@@ -137,6 +138,16 @@ export default function ShoppingList({ store }) {
     />
   );
 
+  const categoriesValue = useMemo(
+    () => ({
+      custom: store.categories,
+      create: store.createCategory,
+      remove: store.deleteCategory,
+      maxCustom: limits?.maxCategoriesPerList ?? 20,
+    }),
+    [store.categories, store.createCategory, store.deleteCategory, limits]
+  );
+
   const blockedReason = !canEdit
     ? `Você tem acesso somente para leitura nesta lista. Só ${currentList?.owner?.name ?? 'o dono'} pode permitir edições.`
     : listFull
@@ -144,6 +155,7 @@ export default function ShoppingList({ store }) {
       : null;
 
   return (
+    <CategoriesContext.Provider value={categoriesValue}>
     <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
       <aside className="sticky top-0 hidden h-dvh flex-col border-r bg-card lg:flex">
         <div className="border-b p-4">
@@ -179,7 +191,7 @@ export default function ShoppingList({ store }) {
               />
 
               <AddProductForm
-                key={currentList.id}
+                key={`form-${currentList.id}`}
                 onAdd={handleAdd}
                 blockedReason={blockedReason}
                 count={products.length}
@@ -188,7 +200,7 @@ export default function ShoppingList({ store }) {
 
               {products.length > 0 ? (
                 <ProductList
-                  key={currentList.id}
+                  key={`items-${currentList.id}`}
                   products={products}
                   readOnly={!canEdit}
                   currentUserId={user?.id}
@@ -254,5 +266,6 @@ export default function ShoppingList({ store }) {
         />
       )}
     </div>
+    </CategoriesContext.Provider>
   );
 }

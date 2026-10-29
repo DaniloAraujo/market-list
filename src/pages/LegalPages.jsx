@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import logo from '@/assets/logo_ta-na-lista-not-name.png';
+import Logo from '@/components/Logo';
 
 const CONTACT_EMAIL = 'daniloo.ag2@gmail.com';
 const UPDATED_AT = '29 de outubro de 2026';
@@ -12,7 +12,7 @@ function LegalLayout({ title, children }) {
         to="/"
         className="mb-8 inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       >
-        <img src={logo} alt="" className="h-9 w-9 object-contain" />
+        <Logo className="h-9 w-9" />
         <span className="font-display text-lg font-semibold tracking-tight">Tá na Lista</span>
       </Link>
 
@@ -47,7 +47,7 @@ export function PrivacyPage() {
   return (
     <LegalLayout title="Política de Privacidade">
       <p>
-        O <strong>Tá na Lista</strong> é um aplicativo de listas de mercado. Esta política explica quais dados
+        O <strong>Tá na Lista</strong> é um aplicativo de listas (mercado, casa, viagem, trabalho ou o que você precisar). Esta política explica quais dados
         tratamos, para quê, com quem compartilhamos e como você exerce seus direitos, de acordo com a Lei Geral de
         Proteção de Dados (LGPD, Lei 13.709/2018).
       </p>
@@ -175,7 +175,7 @@ export function TermsPage() {
   return (
     <LegalLayout title="Termos de Uso">
       <p>
-        Estes termos regem o uso do <strong>Tá na Lista</strong>, aplicativo gratuito de listas de mercado. Ao criar
+        Estes termos regem o uso do <strong>Tá na Lista</strong>, aplicativo gratuito de listas. Ao criar
         uma conta ou usar o serviço, você concorda com eles. Se não concordar, não use o serviço.
       </p>
 
