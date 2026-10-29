@@ -97,10 +97,11 @@ function Footer() {
         Em breve, novidades por aqui.
       </p>
       <p>
-        Para contato, fale conosco via e-mail:{' '}
+        Para contato, fale conosco via{' '}
         <a href={`mailto:${CONTACT_EMAIL}`} className="font-medium text-foreground underline underline-offset-4">
-          {CONTACT_EMAIL}
+          e-mail
         </a>
+        .
       </p>
       <p>
         <Link to="/termos" className="underline-offset-4 hover:underline">
