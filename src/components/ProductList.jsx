@@ -12,10 +12,41 @@ import {
 } from '@/components/ui/dropdown-menu';
 import ProductItem from '@/components/ProductItem';
 import { useCategories } from '@/categories/categories-context';
-import { resolveCategory } from '@/utils/categoryUtils';
+import { categoryToneClasses, resolveCategory } from '@/utils/categoryUtils';
 import { cn } from '@/lib/utils';
 
-function Section({ title, count, children }) {
+const groupByCategory = (items, custom) => {
+  const groups = new Map();
+  for (const item of items) {
+    const info = resolveCategory(item.category, custom);
+    const group = groups.get(info.key) ?? { key: info.key, info, items: [] };
+    group.items.push(item);
+    groups.set(info.key, group);
+  }
+  return [...groups.values()].sort((a, b) => {
+    if (a.info.isDefault !== b.info.isDefault) return a.info.isDefault ? 1 : -1;
+    return a.info.label.localeCompare(b.info.label, 'pt-BR');
+  });
+};
+
+function GroupHeading({ info, count }) {
+  return (
+    <li className="flex items-center gap-2 pb-1 pt-4 first:pt-3">
+      <span
+        className={cn(
+          'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium',
+          info.isDefault ? 'bg-muted text-muted-foreground' : categoryToneClasses(info)
+        )}
+      >
+        <span aria-hidden>{info.emoji}</span>
+        {info.label}
+      </span>
+      <span className="text-[11px] tabular-nums text-muted-foreground">{count}</span>
+    </li>
+  );
+}
+
+function Section({ title, groups, count, renderItem }) {
   return (
     <section>
       <h2 className="flex items-center gap-2 border-b pb-2 font-sans text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -24,7 +55,10 @@ function Section({ title, count, children }) {
       </h2>
       <ul>
         <AnimatePresence mode="popLayout" initial={false}>
-          {children}
+          {groups.flatMap((group) => [
+            <GroupHeading key={`${title}-${group.key}`} info={group.info} count={group.items.length} />,
+            ...group.items.map(renderItem),
+          ])}
         </AnimatePresence>
       </ul>
     </section>
@@ -75,6 +109,8 @@ export default function ProductList({
 
   const pending = filtered.filter((p) => !p.collected);
   const collected = filtered.filter((p) => p.collected);
+  const pendingGroups = useMemo(() => groupByCategory(pending, custom), [pending, custom]);
+  const collectedGroups = useMemo(() => groupByCategory(collected, custom), [collected, custom]);
   const renderItem = (p) => (
     <ProductItem
       key={p.id}
@@ -163,15 +199,11 @@ export default function ProductList({
       )}
 
       {pending.length > 0 && (
-        <Section title="A pegar" count={pending.length}>
-          {pending.map(renderItem)}
-        </Section>
+        <Section title="A pegar" count={pending.length} groups={pendingGroups} renderItem={renderItem} />
       )}
 
       {collected.length > 0 && (
-        <Section title="No carrinho" count={collected.length}>
-          {collected.map(renderItem)}
-        </Section>
+        <Section title="No carrinho" count={collected.length} groups={collectedGroups} renderItem={renderItem} />
       )}
     </div>
   );
