@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, LogIn, LogOut, Trash2, UserX } from 'lucide-react';
+import { Camera, LogIn, LogOut, Sparkles, Trash2, UserX } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/auth/auth-context';
 import Avatar from '@/components/Avatar';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ThemeToggle from '@/components/ThemeToggle';
 import { api } from '@/lib/api';
+import { CONTACT_EMAIL } from '@/lib/contact';
 import { imageToAvatar } from '@/utils/resizeImage';
 
 function Section({ title, description, children }) {
@@ -198,15 +199,28 @@ function AppearanceSection() {
 
 function LegalLinks() {
   return (
-    <p className="pt-2 text-center text-xs text-muted-foreground">
-      <Link to="/termos" className="underline-offset-4 hover:underline">
-        Termos de Uso
-      </Link>
-      {' · '}
-      <Link to="/privacidade" className="underline-offset-4 hover:underline">
-        Política de Privacidade
-      </Link>
-    </p>
+    <footer className="space-y-3 pt-4 text-center text-xs text-muted-foreground">
+      <p className="flex items-center justify-center gap-1.5">
+        <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+        Em breve, novidades por aqui.
+      </p>
+      <p>
+        Contato:{' '}
+        <a href={`mailto:${CONTACT_EMAIL}`} className="text-foreground underline-offset-4 hover:underline">
+          {CONTACT_EMAIL}
+        </a>
+      </p>
+      <p>
+        <Link to="/termos" className="underline-offset-4 hover:underline">
+          Termos de Uso
+        </Link>
+        {' · '}
+        <Link to="/privacidade" className="underline-offset-4 hover:underline">
+          Política de Privacidade
+        </Link>
+      </p>
+      <p>© {new Date().getFullYear()} Tá na Lista. Todos os direitos reservados.</p>
+    </footer>
   );
 }
 
