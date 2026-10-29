@@ -10,6 +10,7 @@ function EditForm({ product, onSave, onClose }) {
     category: product.category,
     quantity: product.quantity,
     priceCents: reaisToCents(product.unitPrice),
+    note: product.note ?? '',
   });
   const [errors, setErrors] = useState({});
 
@@ -29,6 +30,7 @@ function EditForm({ product, onSave, onClose }) {
       category: values.category || 'outros',
       quantity: Number(values.quantity) || 1,
       unitPrice: centsToReais(values.priceCents),
+      note: values.note.trim(),
     });
     onClose();
   };
@@ -52,7 +54,7 @@ export default function EditProductDialog({ product, onSave, onClose }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Editar produto</DialogTitle>
-          <DialogDescription>Ajuste o nome, a quantidade ou o valor.</DialogDescription>
+          <DialogDescription>Ajuste o nome, a quantidade, o valor ou a observação.</DialogDescription>
         </DialogHeader>
         {product && <EditForm key={product.id} product={product} onSave={onSave} onClose={onClose} />}
       </DialogContent>

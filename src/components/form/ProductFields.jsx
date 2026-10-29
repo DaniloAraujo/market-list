@@ -1,10 +1,13 @@
 import { forwardRef } from 'react';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import Field from './Field';
 import CategorySelect from './CategorySelect';
 import QuantityStepper from './QuantityStepper';
 import CurrencyInput from './CurrencyInput';
 import { cn } from '@/lib/utils';
+
+export const NOTE_MAX = 255;
 
 export const NameField = forwardRef(({ value, error, onChange, label = 'Produto', ...props }, ref) => (
   <Field label={label} error={error}>
@@ -33,6 +36,20 @@ export function DetailFields({ values, onChange, compact = false }) {
       </Field>
       <Field label="Valor unitário" optional>
         <CurrencyInput value={values.priceCents} onChange={(priceCents) => onChange({ priceCents })} />
+      </Field>
+      <Field
+        label="Observação"
+        optional
+        hint={`${(values.note ?? '').length}/${NOTE_MAX}`}
+        className={cn('col-span-2', !compact && 'md:col-span-3')}
+      >
+        <Textarea
+          value={values.note ?? ''}
+          onChange={(e) => onChange({ note: e.target.value })}
+          maxLength={NOTE_MAX}
+          rows={2}
+          placeholder="Marca, tamanho, onde comprar..."
+        />
       </Field>
     </div>
   );

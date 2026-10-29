@@ -8,13 +8,14 @@ import { useCategories } from '@/categories/categories-context';
 import { getCategoryLabel } from '@/utils/categoryUtils';
 import { cn } from '@/lib/utils';
 
-const EMPTY = { name: '', category: '', quantity: 1, priceCents: '' };
+const EMPTY = { name: '', category: '', quantity: 1, priceCents: '', note: '' };
 
-const summarize = ({ category, quantity, priceCents }, custom) =>
+const summarize = ({ category, quantity, priceCents, note }, custom) =>
   [
     category ? getCategoryLabel(category, custom) : null,
     quantity > 1 ? `${quantity} un.` : null,
     priceCents ? formatBRL(centsToReais(priceCents)) : null,
+    note.trim() ? 'com observação' : null,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -42,6 +43,7 @@ export default function AddProductForm({ onAdd, blockedReason, count, max }) {
       category: activeCategory,
       quantity: Number(values.quantity) || 1,
       unitPrice: centsToReais(values.priceCents),
+      note: values.note.trim(),
     });
     setBusy(false);
     if (!accepted) return;
@@ -92,7 +94,7 @@ export default function AddProductForm({ onAdd, blockedReason, count, max }) {
           className="h-8 min-w-0 justify-start gap-1.5 px-2.5 text-xs"
         >
           <SlidersHorizontal className="!size-3.5 text-muted-foreground" />
-          <span className="truncate">{detailsOpen || !summary ? 'Categoria, quantidade e valor' : summary}</span>
+          <span className="truncate">{detailsOpen || !summary ? 'Mais detalhes' : summary}</span>
           <ChevronDown className={cn('!size-3.5 text-muted-foreground transition-transform', detailsOpen && 'rotate-180')} />
         </Button>
         {max != null && (

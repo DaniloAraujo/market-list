@@ -7,7 +7,7 @@ import { formatBRL } from '@/utils/currencyUtils';
 import { cn } from '@/lib/utils';
 
 const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete, readOnly = false, currentUserId }, ref) => {
-  const { name, category, quantity, unitPrice, collected, updatedBy } = product;
+  const { name, category, quantity, unitPrice, collected, updatedBy, note } = product;
   const editedByOther = updatedBy && updatedBy.id !== currentUserId ? updatedBy.name : null;
   const hasPrice = unitPrice > 0;
   const { custom } = useCategories();
@@ -78,6 +78,9 @@ const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete, readOnly 
             )}
             {details && <span className="truncate">{details}</span>}
           </span>
+        )}
+        {note && (
+          <span className="mt-1 line-clamp-2 block whitespace-pre-line break-words text-xs text-muted-foreground">{note}</span>
         )}
       </button>
 

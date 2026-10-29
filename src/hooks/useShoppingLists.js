@@ -139,7 +139,7 @@ export function useShoppingLists() {
   );
 
   const addProduct = useCallback(
-    ({ name, category, quantity, unitPrice }) =>
+    ({ name, category, quantity, unitPrice, note }) =>
       updateProducts((items) => [
         ...items,
         {
@@ -148,6 +148,7 @@ export function useShoppingLists() {
           category: category || 'outros',
           quantity: quantity > 0 ? quantity : 1,
           unitPrice: unitPrice || 0,
+          note: String(note ?? '').trim().slice(0, 255),
           collected: false,
           timestamp: Date.now(),
         },
