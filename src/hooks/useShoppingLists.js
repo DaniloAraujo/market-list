@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-const STORAGE_KEY = 'shoppingLists';
+export const STORAGE_KEY = 'shoppingLists';
 
 const newId = () => `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
 
@@ -37,6 +37,23 @@ const init = () => {
   const imported = readSharedList();
   if (!imported) return { lists: saved, currentId: saved[0].id };
   return { lists: [...saved, imported], currentId: imported.id };
+};
+
+/** Listas salvas neste navegador (modo sem login). */
+export const readStoredLists = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+};
+
+/** Remove listas do armazenamento local, por exemplo depois de importá-las para a conta. */
+export const removeStoredLists = (ids) => {
+  const remaining = readStoredLists().filter((list) => !ids.includes(list.id));
+  if (remaining.length > 0) localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining));
+  else localStorage.removeItem(STORAGE_KEY);
 };
 
 const mapList = (lists, listId, fn) => lists.map((l) => (l.id === listId ? fn(l) : l));

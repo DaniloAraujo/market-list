@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChevronDown, Plus } from 'lucide-react';
+import { ChevronDown, Lock, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DetailFields, NameField } from '@/components/form/ProductFields';
 import { centsToReais, formatBRL } from '@/utils/currencyUtils';
@@ -18,7 +18,12 @@ const summarize = ({ category, quantity, priceCents }) =>
     .filter(Boolean)
     .join(' · ');
 
-export default function AddProductForm({ onAdd }) {
+/**
+ * `onAdd` devolve uma promessa com true quando o item foi aceito (a tela só limpa o formulário nesse caso).
+ * `blockedReason` troca o formulário por um aviso (somente leitura, lista cheia...).
+ * `count`/`max` mostram quantos itens a lista já tem quando há limite.
+ */
+export default function AddProductForm({ onAdd, blockedReason, count, max }) {
   const [values, setValues] = useState(EMPTY);
   const [error, setError] = useState('');
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -26,25 +31,40 @@ export default function AddProductForm({ onAdd }) {
 
   const change = (patch) => setValues((v) => ({ ...v, ...patch }));
 
-  const submit = (e) => {
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e) => {
     e.preventDefault();
+    if (busy) return;
     if (!values.name.trim()) {
       setError('Digite o nome do produto');
       nameRef.current?.focus();
       return;
     }
-    onAdd({
+    setBusy(true);
+    const accepted = await onAdd({
       name: values.name,
       category: values.category,
       quantity: Number(values.quantity) || 1,
       unitPrice: centsToReais(values.priceCents),
     });
+    setBusy(false);
+    if (!accepted) return;
     setValues(EMPTY);
     setError('');
     nameRef.current?.focus();
   };
 
   const summary = summarize(values);
+
+  if (blockedReason) {
+    return (
+      <p className="flex items-start gap-2 rounded-lg bg-muted px-3 py-3 text-sm text-muted-foreground" role="status">
+        <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+        {blockedReason}
+      </p>
+    );
+  }
 
   return (
     <form onSubmit={submit} noValidate className="space-y-2">
@@ -62,7 +82,7 @@ export default function AddProductForm({ onAdd }) {
             }}
           />
         </div>
-        <Button type="submit" size="icon" aria-label="Adicionar à lista">
+        <Button type="submit" size="icon" aria-label="Adicionar à lista" disabled={busy}>
           <Plus className="!size-5" />
         </Button>
       </div>
@@ -71,11 +91,16 @@ export default function AddProductForm({ onAdd }) {
         type="button"
         onClick={() => setDetailsOpen((o) => !o)}
         aria-expanded={detailsOpen}
-        className="flex items-center gap-1 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        className="flex w-full items-center gap-1 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       >
         <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', detailsOpen && 'rotate-180')} />
         Categoria, quantidade e valor
         {!detailsOpen && summary && <span className="ml-1 truncate text-foreground">· {summary}</span>}
+        {max != null && (
+          <span className={cn('ml-auto tabular-nums', count >= max * 0.9 && 'font-medium text-destructive')}>
+            {count}/{max} itens
+          </span>
+        )}
       </button>
 
       <AnimatePresence initial={false}>

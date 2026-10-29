@@ -3,8 +3,16 @@ import { buttonVariants } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 
-export default function DeleteListsModal({ open, onOpenChange, lists, selected, onSelectedChange, onConfirm }) {
-  const deletable = lists.slice(1);
+export default function DeleteListsModal({
+  open,
+  onOpenChange,
+  lists,
+  selected,
+  onSelectedChange,
+  onConfirm,
+  lockFirst = true,
+}) {
+  const deletable = lockFirst ? lists.slice(1) : lists;
   const allSelected = deletable.length > 0 && selected.length === deletable.length;
 
   const toggle = (id, checked) =>
@@ -21,7 +29,7 @@ export default function DeleteListsModal({ open, onOpenChange, lists, selected, 
         <AlertDialogHeader>
           <AlertDialogTitle>Excluir listas</AlertDialogTitle>
           <AlertDialogDescription>
-            Escolha as listas que quer apagar. A primeira lista sempre permanece.
+            Escolha as listas que quer apagar.{lockFirst && ' A primeira lista sempre permanece.'}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -34,7 +42,7 @@ export default function DeleteListsModal({ open, onOpenChange, lists, selected, 
             Selecionar todas
           </label>
           {lists.map((list, index) => {
-            const locked = index === 0;
+            const locked = lockFirst && index === 0;
             return (
               <label
                 key={list.id}
@@ -50,7 +58,7 @@ export default function DeleteListsModal({ open, onOpenChange, lists, selected, 
                 />
                 <span className="min-w-0 flex-1 truncate font-medium">{list.name}</span>
                 <span className="text-xs tabular-nums text-muted-foreground">
-                  {list.products.length} {list.products.length === 1 ? 'item' : 'itens'}
+                  {list.itemCount} {list.itemCount === 1 ? 'item' : 'itens'}
                 </span>
               </label>
             );

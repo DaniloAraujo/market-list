@@ -13,8 +13,10 @@ A modern, feature-rich shopping list application built with React and Vite. Mana
 - 🎨 **Modern UI** - Brand-based design system with light/dark themes (Tailwind CSS + Radix UI)
 - ↩️ **Undo** - Removed items and bulk actions can be undone from a toast
 - 🎉 **Progress** - Running totals and a celebration when the list is complete
-- 💾 **Local Storage** - Automatically saves your lists in the browser
-- 🔗 **Share Lists** - Generate shareable links to import lists into other instances
+- 💾 **Local mode** - Without an account, lists stay in the browser (localStorage)
+- ☁️ **Cloud mode** - Sign in (e-mail/password or Google) to keep up to 3 lists (150 items each) in your account, on any device
+- 🔗 **Sharing** - Invite people by link as *read-only* or *editor*; shared lists show up in the **Convidado** section
+- 🔄 **Real time** - Changes made by other people or other devices appear instantly (WebSocket)
 - 📱 **PWA Ready** - Installable as a Progressive Web App
 
 ## Tech Stack
@@ -29,6 +31,22 @@ A modern, feature-rich shopping list application built with React and Vite. Mana
 - **Fontsource** - Bricolage Grotesque + Figtree, self-hosted
 - **Lucide React** - Icon library
 - **LocalStorage API** - Data persistence
+
+## Backend (accounts, sharing, sync)
+
+Login, cloud lists and sharing are served by [market-list-api](https://github.com/DaniloAraujo/market-list-api).
+The app talks to it through `VITE_API_URL`:
+
+```bash
+cp .env.example .env.local   # or use the default in .env.development (http://localhost:8787)
+```
+
+- **Without `VITE_API_URL`** (e.g. a production build before the API is deployed) the app runs in local-only mode:
+  login screens and invite routes are hidden and the Share button just says it is coming soon.
+- On Vercel, set `VITE_API_URL` to the deployed API URL; `vercel.json` already rewrites all paths to the SPA
+  (needed for `/invite/...`, `/verify-email`, `/auth/callback`).
+- When a user signs in for the first time, the app offers to import the lists saved in the browser
+  (respecting the account limits).
 
 ## Getting Started
 

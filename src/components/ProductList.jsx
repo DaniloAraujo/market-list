@@ -56,6 +56,8 @@ export default function ProductList({
   onUncheckAll,
   onClearPrices,
   onClear,
+  readOnly = false,
+  currentUserId,
 }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('todos');
@@ -73,7 +75,15 @@ export default function ProductList({
   const pending = filtered.filter((p) => !p.collected);
   const collected = filtered.filter((p) => p.collected);
   const renderItem = (p) => (
-    <ProductItem key={p.id} product={p} onToggle={onToggle} onEdit={onEdit} onDelete={onDelete} />
+    <ProductItem
+      key={p.id}
+      product={p}
+      onToggle={onToggle}
+      onEdit={onEdit}
+      onDelete={onDelete}
+      readOnly={readOnly}
+      currentUserId={currentUserId}
+    />
   );
 
   return (
@@ -101,6 +111,7 @@ export default function ProductList({
               </button>
             )}
           </div>
+          {!readOnly && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Ações da lista">
@@ -123,6 +134,7 @@ export default function ProductList({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          )}
         </div>
 
         {categories.length > 1 && (

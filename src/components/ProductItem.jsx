@@ -6,8 +6,10 @@ import { getCategoryLabel } from '@/utils/categoryUtils';
 import { formatBRL } from '@/utils/currencyUtils';
 import { cn } from '@/lib/utils';
 
-const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete }, ref) => {
-  const { name, category, quantity, unitPrice, collected } = product;
+const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete, readOnly = false, currentUserId }, ref) => {
+  const { name, category, quantity, unitPrice, collected, updatedBy } = product;
+  // Em listas compartilhadas, mostra quem mexeu por último quando não foi a própria pessoa.
+  const editedByOther = updatedBy && updatedBy.id !== currentUserId ? updatedBy.name : null;
   const hasPrice = unitPrice > 0;
 
   return (
@@ -26,7 +28,9 @@ const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete }, ref) =>
         aria-checked={collected}
         aria-label={collected ? `Desmarcar ${name}` : `Marcar ${name} como pego`}
         onClick={() => onToggle(product.id)}
+        disabled={readOnly}
         className={cn(
+          'disabled:cursor-default',
           'grid h-5 w-5 shrink-0 place-content-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           collected
             ? 'border-primary bg-primary text-primary-foreground'
@@ -39,8 +43,9 @@ const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete }, ref) =>
       <button
         type="button"
         onClick={() => onEdit(product)}
-        aria-label={`Editar ${name}`}
-        className="min-w-0 flex-1 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        disabled={readOnly}
+        aria-label={readOnly ? name : `Editar ${name}`}
+        className="min-w-0 flex-1 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-default"
       >
         <span
           className={cn(
@@ -56,6 +61,7 @@ const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete }, ref) =>
             {getCategoryLabel(category)}
             {quantity > 1 && ` · ${quantity} un.`}
             {hasPrice && quantity > 1 && ` × ${formatBRL(unitPrice)}`}
+            {editedByOther && ` · por ${editedByOther}`}
           </span>
         </span>
       </button>
@@ -65,6 +71,7 @@ const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete }, ref) =>
           {formatBRL(unitPrice * quantity)}
         </span>
       )}
+      {!readOnly && (
       <button
         type="button"
         onClick={() => onDelete(product)}
@@ -73,6 +80,7 @@ const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete }, ref) =>
       >
         <X className="h-4 w-4" />
       </button>
+      )}
     </motion.li>
   );
 });
