@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/auth/auth-context';
 import ListSwitcher from '@/components/ListSwitcher';
+import NewListDialog from '@/components/NewListDialog';
 import ListHeader from '@/components/ListHeader';
 import AddProductForm from '@/components/AddProductForm';
 import ProductList from '@/components/ProductList';
@@ -36,6 +37,7 @@ export default function ListScreen() {
   const [deleteListsOpen, setDeleteListsOpen] = useState(false);
   const [listsToDelete, setListsToDelete] = useState([]);
   const [shareOpen, setShareOpen] = useState(false);
+  const [newListOpen, setNewListOpen] = useState(false);
   const [loginPromptOpen, setLoginPromptOpen] = useState(false);
 
   const collectedCount = products.filter((p) => p.collected).length;
@@ -81,11 +83,22 @@ export default function ListScreen() {
 
   const handleDelete = (product) => withUndo(`${product.name} removido`, () => store.removeProduct(product.id));
 
-  const handleCreateList = async () => {
+  const createBlankList = async () => {
     try {
       await store.createList();
     } catch (error) {
       toast.error(error.message);
+      throw error;
+    }
+  };
+
+  const createTemplateList = async (template) => {
+    try {
+      await store.createListFromTemplate(template);
+      toast.success(`Lista “${template.name}” criada`);
+    } catch (error) {
+      toast.error(error.message);
+      throw error;
     }
   };
 
@@ -116,7 +129,7 @@ export default function ListScreen() {
         ) : !currentList ? (
           <div className="py-16 text-center">
             <p className="text-sm text-muted-foreground">Você ainda não tem listas.</p>
-            <Button className="mt-4" onClick={handleCreateList}>
+            <Button className="mt-4" onClick={() => setNewListOpen(true)}>
               Criar minha primeira lista
             </Button>
           </div>
@@ -129,7 +142,7 @@ export default function ListScreen() {
               limits={limits}
               canDelete={owned.length > (user ? 0 : 1)}
               onSelect={store.selectList}
-              onCreate={handleCreateList}
+              onCreate={() => setNewListOpen(true)}
               onDelete={() => setDeleteListsOpen(true)}
             />
 
@@ -190,6 +203,13 @@ export default function ListScreen() {
         selected={listsToDelete}
         onSelectedChange={setListsToDelete}
         onConfirm={handleDeleteLists}
+      />
+
+      <NewListDialog
+        open={newListOpen}
+        onOpenChange={setNewListOpen}
+        onBlank={createBlankList}
+        onTemplate={createTemplateList}
       />
 
       <LoginRequiredModal open={loginPromptOpen} onOpenChange={setLoginPromptOpen} />

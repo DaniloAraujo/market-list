@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
+import { templateToItems } from '@/data/listTemplates';
 import { useListSocket } from './useListSocket';
 
 const currentKey = (userId) => `cloud:current:${userId}`;
@@ -355,6 +356,22 @@ export function useCloudStore(user) {
     return list;
   }, [setItems]);
 
+  const createListFromTemplate = useCallback(
+    async (template) => {
+      const body = {
+        lists: [{ name: template.name, items: templateToItems(template) }],
+      };
+      const { created } = await api('/v1/lists/import', { method: 'POST', body });
+      if (created.length === 0) {
+        throw new Error('Você atingiu o limite de listas. Exclua uma para criar outra.');
+      }
+      await refreshLists();
+      setPreferredId(created[0].id);
+      return created[0];
+    },
+    [refreshLists]
+  );
+
   const renameList = useCallback(
     (name) => {
       const id = latest.current.currentId;
@@ -423,6 +440,7 @@ export function useCloudStore(user) {
     deleteCategory,
     selectList: setPreferredId,
     createList,
+    createListFromTemplate,
     renameList,
     commitListName,
     deleteLists,

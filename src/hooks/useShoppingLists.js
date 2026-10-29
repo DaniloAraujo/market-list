@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { templateToItems } from '@/data/listTemplates';
+
 export const STORAGE_KEY = 'shoppingLists';
 
 const MAX_CATEGORIES = 20;
@@ -85,6 +87,25 @@ export function useShoppingLists() {
     setLists((prev) => [...prev, list]);
     setCurrentListId(list.id);
   }, [lists.length]);
+
+  const createListFromTemplate = useCallback(
+    (template) => {
+      const products = templateToItems(template).map((entry, index) => ({
+        id: newId(),
+        name: entry.name,
+        category: entry.category,
+        quantity: entry.quantity,
+        unitPrice: 0,
+        note: entry.note,
+        collected: false,
+        timestamp: Date.now() + index,
+      }));
+      const list = makeList(template.name, products);
+      setLists((prev) => [...prev, list]);
+      setCurrentListId(list.id);
+    },
+    []
+  );
 
   const renameList = useCallback(
     (name) => setLists((prev) => mapList(prev, listId, (l) => ({ ...l, name }))),
@@ -198,6 +219,7 @@ export function useShoppingLists() {
     commitListName,
     deleteLists,
     addProduct,
+    createListFromTemplate,
     updateProduct,
     categories,
     addCategory,

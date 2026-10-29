@@ -34,6 +34,7 @@ export function useLocalStore() {
     products: local.products,
     selectList: local.selectList,
     createList: async () => local.createList(),
+    createListFromTemplate: async (template) => local.createListFromTemplate(template),
     renameList: local.renameList,
     commitListName: local.commitListName,
     deleteLists: async (ids) => local.deleteLists(ids),
