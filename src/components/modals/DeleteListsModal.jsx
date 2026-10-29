@@ -1,66 +1,71 @@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
-export default function DeleteListsModal({
-  open,
-  onOpenChange,
-  lists,
-  listsToDelete,
-  selectAllLists,
-  onSelectAll,
-  onListCheckbox,
-  onDeleteSelected,
-  onDeleteAll,
-  onCancel
-}) {
+export default function DeleteListsModal({ open, onOpenChange, lists, selected, onSelectedChange, onConfirm }) {
+  const deletable = lists.slice(1);
+  const allSelected = deletable.length > 0 && selected.length === deletable.length;
+
+  const toggle = (id, checked) =>
+    onSelectedChange(checked ? [...selected, id] : selected.filter((s) => s !== id));
+
+  const handleOpenChange = (next) => {
+    if (!next) onSelectedChange([]);
+    onOpenChange(next);
+  };
+
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="sm:max-w-lg">
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
+      <AlertDialogContent className="sm:max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>Excluir Listas</AlertDialogTitle>
+          <AlertDialogTitle>Excluir listas</AlertDialogTitle>
           <AlertDialogDescription>
-            Selecione as listas para excluir (mínimo de 1 lista deve permanecer)
+            Escolha as listas que quer apagar. A primeira lista sempre permanece.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <div className="space-y-3 my-4 max-h-[40vh] overflow-y-auto pr-2">
-          <div className="flex items-center gap-2 pb-2 border-b">
-            <Checkbox checked={selectAllLists} onCheckedChange={onSelectAll} />
-            <label className="text-sm font-semibold">Selecionar todas (exceto a primeira)</label>
-          </div>
+
+        <div className="max-h-[40vh] space-y-1 overflow-y-auto">
+          <label className="flex cursor-pointer items-center gap-3 rounded-xl border-b px-3 py-3 text-sm font-semibold">
+            <Checkbox
+              checked={allSelected}
+              onCheckedChange={(checked) => onSelectedChange(checked ? deletable.map((l) => l.id) : [])}
+            />
+            Selecionar todas
+          </label>
           {lists.map((list, index) => {
-            const isFirst = index === 0;
-            const isDisabled = isFirst || (lists.length - listsToDelete.length === 1 && !listsToDelete.includes(list.id));
+            const locked = index === 0;
             return (
-              <div key={list.id} className={`flex items-center gap-2 ${isDisabled ? 'opacity-50' : ''}`}>
-                <Checkbox 
-                  checked={listsToDelete.includes(list.id)} 
-                  onCheckedChange={(checked) => onListCheckbox(list.id, checked)}
-                  disabled={isDisabled}
+              <label
+                key={list.id}
+                className={cn(
+                  'flex items-center gap-3 rounded-xl px-3 py-3 text-sm',
+                  locked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted'
+                )}
+              >
+                <Checkbox
+                  checked={selected.includes(list.id)}
+                  onCheckedChange={(checked) => toggle(list.id, checked)}
+                  disabled={locked}
                 />
-                <label className="text-sm">{list.name} ({list.products.length} itens)</label>
-              </div>
+                <span className="min-w-0 flex-1 truncate font-medium">{list.name}</span>
+                <span className="text-xs tabular-nums text-muted-foreground">
+                  {list.products.length} {list.products.length === 1 ? 'item' : 'itens'}
+                </span>
+              </label>
             );
           })}
         </div>
-        <AlertDialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-0">
-          <AlertDialogCancel onClick={onCancel}>
-            Cancelar
-          </AlertDialogCancel>
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            {lists.length > 1 && (
-              <Button variant="outline" onClick={onDeleteAll} className="w-full sm:w-auto">
-                Excluir Todas (exceto primeira)
-              </Button>
-            )}
-            <AlertDialogAction 
-              onClick={onDeleteSelected} 
-              disabled={listsToDelete.length === 0} 
-              className="bg-red-600 w-full sm:w-auto"
-            >
-              Excluir Selecionadas
-            </AlertDialogAction>
-          </div>
+
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onConfirm}
+            disabled={selected.length === 0}
+            className={buttonVariants({ variant: 'destructive' })}
+          >
+            Excluir {selected.length > 0 && `(${selected.length})`}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

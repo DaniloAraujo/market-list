@@ -10,7 +10,9 @@ A modern, feature-rich shopping list application built with React and Vite. Mana
 - ✅ **Check-off Items** - Mark products as collected with visual feedback
 - 🔍 **Filter & Search** - Filter products by category and view by status (pending/collected)
 - 📱 **Responsive Design** - Works seamlessly on desktop and mobile devices
-- 🎨 **Modern UI** - Built with Tailwind CSS and Radix UI components
+- 🎨 **Modern UI** - Brand-based design system with light/dark themes (Tailwind CSS + Radix UI)
+- ↩️ **Undo** - Removed items and bulk actions can be undone from a toast
+- 🎉 **Progress** - Running totals and a celebration when the list is complete
 - 💾 **Local Storage** - Automatically saves your lists in the browser
 - 🔗 **Share Lists** - Generate shareable links to import lists into other instances
 - 📱 **PWA Ready** - Installable as a Progressive Web App
@@ -21,6 +23,10 @@ A modern, feature-rich shopping list application built with React and Vite. Mana
 - **Vite** - Build tool and dev server
 - **Tailwind CSS** - Utility-first CSS framework
 - **Radix UI** - Accessible component primitives
+- **Motion** - List and progress animations
+- **Sonner** - Toasts with undo
+- **canvas-confetti** - Completion celebration
+- **Fontsource** - Bricolage Grotesque + Figtree, self-hosted
 - **Lucide React** - Icon library
 - **LocalStorage API** - Data persistence
 

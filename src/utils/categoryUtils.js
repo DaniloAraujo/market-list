@@ -1,60 +1,38 @@
-import { ShoppingCart, Apple, Coffee, Droplet, Sparkles, Star, Heart, Plus } from 'lucide-react';
+import {
+  Apple,
+  Beef,
+  Croissant,
+  Utensils,
+  CupSoda,
+  SprayCan,
+  Bath,
+  Sparkles,
+  PawPrint,
+  Pill,
+  Dumbbell,
+  CalendarCheck,
+  Package,
+} from 'lucide-react';
 
 export const CATEGORIES = ['acougue', 'alimentos', 'bebidas', 'beleza', 'farmacia', 'fitness', 'higiene', 'hortifruti', 'itens-da-semana', 'limpeza', 'outros', 'padaria', 'pet'];
 
-export const getCategoryColor = (cat) => {
-  const colors = {
-    hortifruti: 'bg-green-100 text-green-700',
-    acougue: 'bg-red-100 text-red-700',
-    padaria: 'bg-amber-100 text-amber-700',
-    alimentos: 'bg-orange-100 text-orange-700',
-    bebidas: 'bg-purple-100 text-purple-700',
-    limpeza: 'bg-blue-100 text-blue-700',
-    higiene: 'bg-cyan-100 text-cyan-700',
-    beleza: 'bg-pink-100 text-pink-700',
-    pet: 'bg-yellow-100 text-yellow-700',
-    farmacia: 'bg-emerald-100 text-emerald-700',
-    fitness: 'bg-indigo-100 text-indigo-700',
-    'itens-da-semana': 'bg-violet-100 text-violet-700',
-    outros: 'bg-gray-100 text-gray-700'
-  };
-  return colors[cat] || colors.outros;
+const CATEGORY_META = {
+  hortifruti: { label: 'Hortifruti', Icon: Apple, chip: 'bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300' },
+  acougue: { label: 'Açougue', Icon: Beef, chip: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300' },
+  padaria: { label: 'Padaria', Icon: Croissant, chip: 'bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-300' },
+  alimentos: { label: 'Alimentos', Icon: Utensils, chip: 'bg-orange-100 text-orange-800 dark:bg-orange-500/15 dark:text-orange-300' },
+  bebidas: { label: 'Bebidas', Icon: CupSoda, chip: 'bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-300' },
+  limpeza: { label: 'Limpeza', Icon: SprayCan, chip: 'bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300' },
+  higiene: { label: 'Higiene', Icon: Bath, chip: 'bg-cyan-100 text-cyan-900 dark:bg-cyan-500/15 dark:text-cyan-300' },
+  beleza: { label: 'Beleza', Icon: Sparkles, chip: 'bg-pink-100 text-pink-800 dark:bg-pink-500/15 dark:text-pink-300' },
+  pet: { label: 'Pet', Icon: PawPrint, chip: 'bg-yellow-100 text-yellow-900 dark:bg-yellow-500/15 dark:text-yellow-300' },
+  farmacia: { label: 'Farmácia', Icon: Pill, chip: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300' },
+  fitness: { label: 'Fitness', Icon: Dumbbell, chip: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-300' },
+  'itens-da-semana': { label: 'Itens da Semana', Icon: CalendarCheck, chip: 'bg-violet-100 text-violet-800 dark:bg-violet-500/15 dark:text-violet-300' },
+  outros: { label: 'Outros', Icon: Package, chip: 'bg-stone-200 text-stone-800 dark:bg-stone-500/20 dark:text-stone-300' },
 };
 
-export const getCategoryIcon = (cat) => {
-  const icons = {
-    hortifruti: { Icon: Apple, color: 'text-green-600' },
-    acougue: { Icon: ShoppingCart, color: 'text-red-600' },
-    padaria: { Icon: Coffee, color: 'text-amber-600' },
-    alimentos: { Icon: ShoppingCart, color: 'text-orange-600' },
-    bebidas: { Icon: Coffee, color: 'text-purple-600' },
-    limpeza: { Icon: Droplet, color: 'text-blue-600' },
-    higiene: { Icon: Sparkles, color: 'text-cyan-600' },
-    beleza: { Icon: Star, color: 'text-pink-600' },
-    pet: { Icon: Heart, color: 'text-yellow-600' },
-    farmacia: { Icon: Plus, color: 'text-emerald-600' },
-    fitness: { Icon: Star, color: 'text-indigo-600' },
-    'itens-da-semana': { Icon: ShoppingCart, color: 'text-violet-600' },
-    outros: { Icon: ShoppingCart, color: 'text-gray-600' }
-  };
-  return icons[cat] || icons.outros;
-};
-
-export const getCategoryLabel = (cat) => {
-  const labels = {
-    hortifruti: 'Hortifruti',
-    acougue: 'Açougue',
-    padaria: 'Padaria',
-    alimentos: 'Alimentos',
-    bebidas: 'Bebidas',
-    limpeza: 'Limpeza',
-    higiene: 'Higiene',
-    beleza: 'Beleza',
-    pet: 'Pet',
-    farmacia: 'Farmácia',
-    fitness: 'Fitness',
-    'itens-da-semana': 'Itens da Semana',
-    outros: 'Outros'
-  };
-  return labels[cat] || labels.outros;
-};
+export const getCategoryMeta = (cat) => CATEGORY_META[cat] || CATEGORY_META.outros;
+export const getCategoryLabel = (cat) => getCategoryMeta(cat).label;
+export const getCategoryColor = (cat) => getCategoryMeta(cat).chip;
+export const getCategoryIcon = (cat) => getCategoryMeta(cat).Icon;

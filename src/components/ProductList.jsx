@@ -1,248 +1,162 @@
-import { useState } from 'react';
-import { List, FileText, Filter, CheckSquare, Square, Eraser, Trash2, DollarSign, Search } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useMemo, useState } from 'react';
+import { AnimatePresence } from 'motion/react';
+import { CheckCheck, Eraser, MoreHorizontal, RotateCcw, Search, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ProductCard from './ProductCard';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import ProductItem from '@/components/ProductItem';
+import CategoryIcon from '@/components/CategoryIcon';
 import { getCategoryLabel } from '@/utils/categoryUtils';
+import { cn } from '@/lib/utils';
+
+function Section({ title, count, children }) {
+  return (
+    <section>
+      <h2 className="flex items-center gap-2 border-b pb-2 font-sans text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        {title}
+        <span className="tabular-nums">{count}</span>
+      </h2>
+      <ul>
+        <AnimatePresence mode="popLayout" initial={false}>
+          {children}
+        </AnimatePresence>
+      </ul>
+    </section>
+  );
+}
+
+function CategoryChip({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+        active ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:text-foreground'
+      )}
+    >
+      {children}
+    </button>
+  );
+}
 
 export default function ProductList({
   products,
-  filterCategory,
-  currentTab,
-  availableCategories,
-  onFilterChange,
-  onTabChange,
+  onToggle,
+  onEdit,
+  onDelete,
   onCheckAll,
   onUncheckAll,
   onClearPrices,
-  onShowClearModal,
-  onToggleProduct,
-  onUpdateProduct,
-  onDeleteProduct,
-  calculateTotal
+  onClear,
 }) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('todos');
 
-  const searchFiltered = searchQuery.trim()
-    ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase().trim()))
-    : products;
-  const filteredProducts = filterCategory === 'todos'
-    ? searchFiltered
-    : searchFiltered.filter(p => p.category === filterCategory);
-  const pendingProducts = filteredProducts.filter(p => !p.collected);
-  const collectedProducts = filteredProducts.filter(p => p.collected);
-  const hasSearchResults = filteredProducts.length > 0;
+  const categories = useMemo(() => [...new Set(products.map((p) => p.category))], [products]);
+  const activeCategory = category === 'todos' || categories.includes(category) ? category : 'todos';
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return products.filter(
+      (p) => (activeCategory === 'todos' || p.category === activeCategory) && (!q || p.name.toLowerCase().includes(q))
+    );
+  }, [products, query, activeCategory]);
+
+  const pending = filtered.filter((p) => !p.collected);
+  const collected = filtered.filter((p) => p.collected);
+  const renderItem = (p) => (
+    <ProductItem key={p.id} product={p} onToggle={onToggle} onEdit={onEdit} onDelete={onDelete} />
+  );
 
   return (
-    <Tabs value={currentTab} onValueChange={onTabChange}>
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="all">
-          <List className="w-4 h-4 mr-2" />
-          Tudo
-        </TabsTrigger>
-        <TabsTrigger value="items">
-          <FileText className="w-4 h-4 mr-2" />
-          Meus Itens
-        </TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="items" className="space-y-6 mt-6">
-        {calculateTotal() > 0 && (
-          <Card className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <DollarSign className="w-8 h-8" />
-                  <div>
-                    <p className="text-sm opacity-90">Total</p>
-                    <p className="text-3xl font-bold">R$ {calculateTotal().toFixed(2)}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm opacity-90">Com preço</p>
-                  <p className="text-xl font-semibold">
-                    {products.filter(p => p.unitPrice > 0).length}/{products.length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        
-        {pendingProducts.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                A Pegar <Badge>{pendingProducts.length}</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {pendingProducts.map(p => (
-                <ProductCard 
-                  key={p.id} 
-                  product={p} 
-                  onToggle={onToggleProduct}
-                  onUpdate={onUpdateProduct}
-                  onDelete={onDeleteProduct}
-                />
-              ))}
-            </CardContent>
-          </Card>
-        )}
-        
-        {collectedProducts.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                Coletados <Badge>{collectedProducts.length}</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {collectedProducts.map(p => (
-                <ProductCard 
-                  key={p.id} 
-                  product={p} 
-                  onToggle={onToggleProduct}
-                  onUpdate={onUpdateProduct}
-                  onDelete={onDeleteProduct}
-                />
-              ))}
-            </CardContent>
-          </Card>
-        )}
-      </TabsContent>
-      
-      <TabsContent value="all" className="space-y-6 mt-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Filter className="w-5 h-5" />
-              Filtros e Ações
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>Buscar</Label>
-              <div className="relative mt-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar item por nome..."
-                  className="pl-9"
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Filtrar</Label>
-              <Select value={filterCategory} onValueChange={onFilterChange}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  {availableCategories.map(cat => (
-                    <SelectItem key={cat} value={cat}>
-                      {getCategoryLabel(cat)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" onClick={onCheckAll}>
-                <CheckSquare className="w-4 h-4 mr-2 text-green-600" />
-                Marcar
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar na lista"
+              aria-label="Buscar na lista"
+              className="pl-9 pr-9 [&::-webkit-search-cancel-button]:hidden"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                aria-label="Limpar busca"
+                className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-content-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Ações da lista">
+                <MoreHorizontal />
               </Button>
-              <Button variant="outline" onClick={onUncheckAll}>
-                <Square className="w-4 h-4 mr-2 text-orange-600" />
-                Desmarcar
-              </Button>
-              <Button variant="outline" onClick={onClearPrices}>
-                <Eraser className="w-4 h-4 mr-2 text-purple-600" />
-                Limpar $
-              </Button>
-              <Button variant="outline" onClick={onShowClearModal}>
-                <Trash2 className="w-4 h-4 mr-2 text-red-600" />
-                Limpar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={onCheckAll}>
+                <CheckCheck /> Marcar todos como pegos
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={onUncheckAll}>
+                <RotateCcw /> Desmarcar todos
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={onClearPrices}>
+                <Eraser /> Limpar valores
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem destructive onSelect={onClear}>
+                <Trash2 /> Esvaziar lista
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-        {searchQuery.trim() && !hasSearchResults && (
-          <Card>
-            <CardContent className="p-6 text-center text-muted-foreground">
-              Nenhum item encontrado para &quot;{searchQuery.trim()}&quot;
-            </CardContent>
-          </Card>
+        {categories.length > 1 && (
+          <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+            <CategoryChip active={activeCategory === 'todos'} onClick={() => setCategory('todos')}>
+              Todos
+            </CategoryChip>
+            {categories.map((cat) => (
+              <CategoryChip key={cat} active={activeCategory === cat} onClick={() => setCategory(cat)}>
+                <CategoryIcon category={cat} className="h-3.5 w-3.5" />
+                {getCategoryLabel(cat)}
+              </CategoryChip>
+            ))}
+          </div>
         )}
-        
-        {pendingProducts.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                A Pegar <Badge>{pendingProducts.length}</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {pendingProducts.map(p => (
-                <ProductCard 
-                  key={p.id} 
-                  product={p} 
-                  onToggle={onToggleProduct}
-                  onUpdate={onUpdateProduct}
-                  onDelete={onDeleteProduct}
-                />
-              ))}
-            </CardContent>
-          </Card>
-        )}
-        
-        {collectedProducts.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                Coletados <Badge>{collectedProducts.length}</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {collectedProducts.map(p => (
-                <ProductCard 
-                  key={p.id} 
-                  product={p} 
-                  onToggle={onToggleProduct}
-                  onUpdate={onUpdateProduct}
-                  onDelete={onDeleteProduct}
-                />
-              ))}
-            </CardContent>
-          </Card>
-        )}
-        
-        {calculateTotal() > 0 && (
-          <Card className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex justify-between">
-                <div>
-                  <DollarSign className="w-8 h-8 inline mr-2" />
-                  <span className="text-2xl font-bold">R$ {calculateTotal().toFixed(2)}</span>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm">
-                    Com preço: {products.filter(p => p.unitPrice > 0).length}/{products.length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </TabsContent>
-    </Tabs>
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="py-8 text-center text-sm text-muted-foreground">
+          Nenhum item encontrado{query.trim() && <> para &ldquo;{query.trim()}&rdquo;</>}.
+        </div>
+      )}
+
+      {pending.length > 0 && (
+        <Section title="A pegar" count={pending.length}>
+          {pending.map(renderItem)}
+        </Section>
+      )}
+
+      {collected.length > 0 && (
+        <Section title="No carrinho" count={collected.length}>
+          {collected.map(renderItem)}
+        </Section>
+      )}
+    </div>
   );
 }

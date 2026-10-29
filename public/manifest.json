@@ -4,8 +4,8 @@
   "description": "Sua lista de mercado digital",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3b82f6",
+  "background_color": "#f8f3ea",
+  "theme_color": "#e8590c",
   "orientation": "portrait-primary",
   "icons": [
     {
