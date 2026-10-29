@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, ChevronRight, LayoutTemplate, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { LIST_TEMPLATES } from '@/data/listTemplates';
+import { LIST_TEMPLATES, templateCategories } from '@/data/listTemplates';
 import { BUILTIN_CATEGORIES } from '@/utils/categoryUtils';
 
 const EMOJI_BY_CATEGORY = Object.fromEntries(BUILTIN_CATEGORIES.map((category) => [category.key, category.emoji]));
@@ -69,13 +69,18 @@ function TemplateList({ onPick, onBack }) {
 }
 
 function Preview({ template, onBack, onCreate, busy }) {
+  const emojiByCategory = {
+    ...EMOJI_BY_CATEGORY,
+    ...Object.fromEntries(templateCategories(template).map((category) => [category.key, category.emoji])),
+  };
+
   return (
     <div className="space-y-3">
       <ul className="max-h-[40vh] divide-y overflow-y-auto rounded-xl border">
         {template.items.map((entry) => (
           <li key={entry.name} className="flex items-start gap-2.5 px-3 py-2 text-sm">
             <span aria-hidden="true" className="w-5 shrink-0 text-center">
-              {EMOJI_BY_CATEGORY[entry.category]}
+              {emojiByCategory[entry.category]}
             </span>
             <span className="min-w-0 flex-1">
               <span className="block">{entry.name}</span>

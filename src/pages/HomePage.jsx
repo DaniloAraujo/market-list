@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useEffect, useMemo, useRef } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/auth/auth-context';
 import { CategoriesContext } from '@/categories/categories-context';
 import BottomNav from '@/components/BottomNav';
@@ -11,6 +11,12 @@ import { useLocalStore } from '@/stores/useLocalStore';
 
 function Frame({ store, children }) {
   const { limits } = store;
+  const { pathname } = useLocation();
+  const scroller = useRef(null);
+
+  useEffect(() => {
+    scroller.current?.scrollTo(0, 0);
+  }, [pathname]);
 
   const categoriesValue = useMemo(
     () => ({
@@ -25,10 +31,12 @@ function Frame({ store, children }) {
   return (
     <StoreContext.Provider value={store}>
       <CategoriesContext.Provider value={categoriesValue}>
-        <div className="min-h-dvh pb-[calc(var(--nav-h)+1rem)]">
-          <Outlet />
+        <div className="flex h-dvh flex-col">
+          <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <Outlet />
+          </div>
+          <BottomNav pending={store.products.filter((product) => !product.collected).length} />
         </div>
-        <BottomNav pending={store.products.filter((product) => !product.collected).length} />
         {children}
       </CategoriesContext.Provider>
     </StoreContext.Provider>

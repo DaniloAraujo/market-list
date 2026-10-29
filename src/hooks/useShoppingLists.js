@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { templateToItems } from '@/data/listTemplates';
+import { templateCategories, templateToItems } from '@/data/listTemplates';
 
 export const STORAGE_KEY = 'shoppingLists';
 
@@ -90,17 +90,22 @@ export function useShoppingLists() {
 
   const createListFromTemplate = useCallback(
     (template) => {
+      const categories = templateCategories(template).map(({ key, name, emoji }) => ({ key, id: `c_${newId()}`, name, emoji }));
+      const idByKey = new Map(categories.map((category) => [category.key, category.id]));
       const products = templateToItems(template).map((entry, index) => ({
         id: newId(),
         name: entry.name,
-        category: entry.category,
+        category: idByKey.get(entry.category) ?? entry.category,
         quantity: entry.quantity,
         unitPrice: 0,
         note: entry.note,
         collected: false,
         timestamp: Date.now() + index,
       }));
-      const list = makeList(template.name, products);
+      const list = {
+        ...makeList(template.name, products),
+        categories: categories.map(({ id, name, emoji }) => ({ id, name, emoji })),
+      };
       setLists((prev) => [...prev, list]);
       setCurrentListId(list.id);
     },

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
-import { templateToItems } from '@/data/listTemplates';
+import { templateCategories, templateToItems } from '@/data/listTemplates';
 import { useListSocket } from './useListSocket';
 
 const currentKey = (userId) => `cloud:current:${userId}`;
@@ -359,7 +359,7 @@ export function useCloudStore(user) {
   const createListFromTemplate = useCallback(
     async (template) => {
       const body = {
-        lists: [{ name: template.name, items: templateToItems(template) }],
+        lists: [{ name: template.name, categories: templateCategories(template), items: templateToItems(template) }],
       };
       const { created } = await api('/v1/lists/import', { method: 'POST', body });
       if (created.length === 0) {

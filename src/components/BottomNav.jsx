@@ -43,7 +43,7 @@ export default function BottomNav({ pending = 0 }) {
   return (
     <nav
       aria-label="Navegação principal"
-      className="fixed inset-x-0 bottom-0 z-40 border-t bg-card pb-[env(safe-area-inset-bottom)]"
+      className="shrink-0 border-t bg-card pb-[env(safe-area-inset-bottom)]"
     >
       <div className="mx-auto flex h-14 max-w-2xl items-stretch gap-1 px-2">
         <Item to="/" end label="Listas" badge={pending}>
