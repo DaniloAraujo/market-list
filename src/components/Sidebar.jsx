@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Eye, LogOut, MoreHorizontal, Pencil, Plus, Trash2, UserX } from 'lucide-react';
+import { Eye, LogOut, MoreHorizontal, Pencil, Plus, Trash2, UserRound, UserX } from 'lucide-react';
+import Avatar from '@/components/Avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -44,9 +45,7 @@ function ListButton({ list, active, onSelect }) {
 function Account({ user, onLogout, onDeleteAccount }) {
   return (
     <div className="flex items-center gap-2 rounded-md px-1 py-1">
-      <span className="grid h-8 w-8 shrink-0 place-content-center rounded-full bg-primary-soft text-sm font-semibold text-accent-foreground">
-        {user.name.slice(0, 1).toUpperCase()}
-      </span>
+      <Avatar user={user} className="h-8 w-8 text-sm" />
       <span className="min-w-0 flex-1 leading-tight">
         <span className="block truncate text-sm font-medium">{user.name}</span>
         <span className="block truncate text-xs text-muted-foreground">{user.email}</span>
@@ -58,6 +57,11 @@ function Account({ user, onLogout, onDeleteAccount }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" side="top">
+          <DropdownMenuItem asChild>
+            <Link to="/perfil">
+              <UserRound /> Meu perfil
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem onSelect={onLogout}>
             <LogOut /> Sair
           </DropdownMenuItem>

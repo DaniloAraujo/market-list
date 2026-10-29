@@ -73,9 +73,11 @@ export default function AuthProvider({ children }) {
     setState({ status: 'guest', user: null });
   }, []);
 
+  const updateUser = useCallback((user) => setState((current) => (current.status === 'authed' ? { ...current, user } : current)), []);
+
   const value = useMemo(
-    () => ({ ...state, enabled: API_ENABLED, login, exchangeCode, logout, deleteAccount }),
-    [state, login, exchangeCode, logout, deleteAccount]
+    () => ({ ...state, enabled: API_ENABLED, login, exchangeCode, logout, deleteAccount, updateUser }),
+    [state, login, exchangeCode, logout, deleteAccount, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

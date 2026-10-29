@@ -1,10 +1,12 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AuthProvider from "@/auth/AuthProvider";
+import InstallPrompt from "@/components/InstallPrompt";
 import { Toaster } from "@/components/ui/sonner";
 import { API_ENABLED } from "@/lib/api";
 import AuthCallbackPage from "@/pages/AuthCallbackPage";
 import HomePage from "@/pages/HomePage";
 import InvitePage from "@/pages/InvitePage";
+import ProfilePage from "@/pages/ProfilePage";
 import LoginPage from "@/pages/LoginPage";
 import { ForgotPasswordPage, ResetPasswordPage } from "@/pages/PasswordPages";
 import { PrivacyPage, TermsPage } from "@/pages/LegalPages";
@@ -22,6 +24,7 @@ export default function App() {
           {API_ENABLED && (
             <>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/perfil" element={<ProfilePage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/verify-email" element={<VerifyEmailPage />} />
@@ -32,6 +35,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
+      <InstallPrompt />
       <Toaster />
     </BrowserRouter>
   );
