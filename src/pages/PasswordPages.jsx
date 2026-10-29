@@ -55,8 +55,9 @@ export function ForgotPasswordPage() {
 export function ResetPasswordPage() {
   const [params] = useSearchParams();
   const token = params.get('token') ?? '';
+  const reactivating = params.get('reactivate') === '1';
   const [password, setPassword] = useState('');
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -65,8 +66,8 @@ export function ResetPasswordPage() {
     setBusy(true);
     setError('');
     try {
-      await api('/v1/auth/reset-password', { method: 'POST', body: { token, password }, token: null });
-      setDone(true);
+      const result = await api('/v1/auth/reset-password', { method: 'POST', body: { token, password }, token: null });
+      setDone({ reactivated: result.reactivated });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -75,10 +76,23 @@ export function ResetPasswordPage() {
   };
 
   return (
-    <AuthShell title="Nova senha" subtitle={done ? undefined : 'Escolha uma senha com pelo menos 8 caracteres.'}>
+    <AuthShell
+      title={reactivating ? 'Reativar conta' : 'Nova senha'}
+      subtitle={
+        done
+          ? undefined
+          : reactivating
+            ? 'Escolha uma senha para voltar à sua conta. Suas listas estão guardadas.'
+            : 'Escolha uma senha com pelo menos 8 caracteres.'
+      }
+    >
       {done ? (
         <div className="space-y-4">
-          <p className="text-sm">Senha alterada. Por segurança, você foi desconectado dos outros aparelhos.</p>
+          <p className="text-sm">
+            {done.reactivated
+              ? 'Conta reativada! Suas listas estão de volta. Entre com a nova senha.'
+              : 'Senha alterada. Por segurança, você foi desconectado dos outros aparelhos.'}
+          </p>
           <Button asChild className="w-full">
             <Link to="/login">Entrar</Link>
           </Button>
@@ -90,7 +104,7 @@ export function ResetPasswordPage() {
           </Field>
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="w-full" disabled={busy || !token}>
-            {busy ? 'Salvando...' : 'Salvar nova senha'}
+            {busy ? 'Salvando...' : reactivating ? 'Reativar conta' : 'Salvar nova senha'}
           </Button>
         </form>
       )}

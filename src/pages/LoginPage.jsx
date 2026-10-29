@@ -35,6 +35,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(googleFailed ? 'Não foi possível entrar com o Google. Tente de novo.' : '');
   const [needsVerification, setNeedsVerification] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [busy, setBusy] = useState(false);
   const [resent, setResent] = useState(false);
@@ -52,6 +53,7 @@ export default function LoginPage() {
     setParams(nextParams, { replace: true });
     setError('');
     setNeedsVerification(false);
+    setDisabled(false);
   };
 
   const rememberNext = () => pendingNext.set(next === '/' ? null : next);
@@ -60,6 +62,7 @@ export default function LoginPage() {
     event.preventDefault();
     setError('');
     setNeedsVerification(false);
+    setDisabled(false);
     setBusy(true);
     rememberNext();
     try {
@@ -73,6 +76,7 @@ export default function LoginPage() {
       }
     } catch (err) {
       if (err.code === 'EMAIL_NOT_VERIFIED') setNeedsVerification(true);
+      if (err.code === 'ACCOUNT_DISABLED') setDisabled(true);
       const field = err.details?.[0]?.message;
       setError(err.code === 'VALIDATION_ERROR' && field ? `${err.message} ${field}.` : err.message);
     } finally {
@@ -95,7 +99,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center gap-3 text-center">
           <MailCheck className="h-10 w-10 text-primary" />
           <p className="text-sm">
-            Enviamos um link de confirmação para <strong>{registeredEmail}</strong>. Abra o e-mail para ativar sua conta e depois entre.
+            Enviamos um e-mail para <strong>{registeredEmail}</strong>. Abra o link para confirmar sua conta e depois entre. Se este e-mail já teve uma conta desativada, o link serve para reativá-la.
           </p>
           <Button variant="ghost" size="sm" onClick={resend} disabled={resent}>
             {resent ? 'E-mail reenviado' : 'Reenviar e-mail'}
@@ -168,6 +172,11 @@ export default function LoginPage() {
           <p role="alert" className="text-sm text-destructive">
             {error}
           </p>
+        )}
+        {disabled && (
+          <Button type="button" variant="soft" size="sm" onClick={switchMode}>
+            Reativar minha conta
+          </Button>
         )}
         {needsVerification && (
           <Button type="button" variant="ghost" size="sm" onClick={resend} disabled={resent}>

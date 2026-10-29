@@ -100,9 +100,6 @@
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
-  .pb-safe {
-    padding-bottom: max(env(safe-area-inset-bottom), 0px);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

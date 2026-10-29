@@ -66,9 +66,16 @@ export default function AuthProvider({ children }) {
     setState({ status: 'guest', user: null });
   }, []);
 
+  /** Exclui (desativa) a conta e encerra a sessão neste aparelho. */
+  const deleteAccount = useCallback(async (confirmEmail) => {
+    await api('/v1/me', { method: 'DELETE', body: { confirmEmail } });
+    tokenStorage.clear();
+    setState({ status: 'guest', user: null });
+  }, []);
+
   const value = useMemo(
-    () => ({ ...state, enabled: API_ENABLED, login, exchangeCode, logout }),
-    [state, login, exchangeCode, logout]
+    () => ({ ...state, enabled: API_ENABLED, login, exchangeCode, logout, deleteAccount }),
+    [state, login, exchangeCode, logout, deleteAccount]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

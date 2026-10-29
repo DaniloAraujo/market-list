@@ -16,6 +16,7 @@ A modern, feature-rich shopping list application built with React and Vite. Mana
 - 💾 **Local mode** - Without an account, lists stay in the browser (localStorage)
 - ☁️ **Cloud mode** - Sign in (e-mail/password or Google) to keep up to 3 lists (150 items each) in your account, on any device
 - 🔗 **Sharing** - Invite people by link as *read-only* or *editor*; shared lists show up in the **Convidado** section
+- 🗑️ **Delete account** - Accounts are deactivated, not erased; the same e-mail (or Google) can reactivate it and bring the lists back
 - 🔄 **Real time** - Changes made by other people or other devices appear instantly (WebSocket)
 - 📱 **PWA Ready** - Installable as a Progressive Web App
 

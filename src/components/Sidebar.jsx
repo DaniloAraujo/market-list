@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Eye, LogOut, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Eye, LogOut, MoreHorizontal, Pencil, Plus, Trash2, UserX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ThemeToggle from '@/components/ThemeToggle';
 import logo from '@/assets/logo_ta-na-lista-not-name.png';
 import { cn } from '@/lib/utils';
@@ -40,7 +41,7 @@ function ListButton({ list, active, onSelect }) {
   );
 }
 
-function Account({ user, onLogout }) {
+function Account({ user, onLogout, onDeleteAccount }) {
   return (
     <div className="flex items-center gap-2 rounded-md px-1 py-1">
       <span className="grid h-8 w-8 shrink-0 place-content-center rounded-full bg-primary-soft text-sm font-semibold text-accent-foreground">
@@ -50,9 +51,22 @@ function Account({ user, onLogout }) {
         <span className="block truncate text-sm font-medium">{user.name}</span>
         <span className="block truncate text-xs text-muted-foreground">{user.email}</span>
       </span>
-      <Button variant="ghost" size="icon-sm" onClick={onLogout} aria-label="Sair" title="Sair">
-        <LogOut />
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon-sm" aria-label="Menu da conta" title="Conta">
+            <MoreHorizontal />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" side="top">
+          <DropdownMenuItem onSelect={onLogout}>
+            <LogOut /> Sair
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem destructive onSelect={onDeleteAccount}>
+            <UserX /> Excluir conta
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
@@ -68,6 +82,7 @@ export default function Sidebar({
   onCreateList,
   onDeleteLists,
   onLogout,
+  onDeleteAccount,
   onNavigate,
 }) {
   const select = (id) => {
@@ -138,7 +153,14 @@ export default function Sidebar({
         {authEnabled && (
           <div className="border-t pt-3">
             {user ? (
-              <Account user={user} onLogout={onLogout} />
+              <Account
+                user={user}
+                onLogout={onLogout}
+                onDeleteAccount={() => {
+                  onDeleteAccount();
+                  onNavigate?.();
+                }}
+              />
             ) : (
               <div className="space-y-2 px-1">
                 <Button asChild variant="outline" size="sm" className="w-full">

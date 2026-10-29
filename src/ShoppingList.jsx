@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import ClearCartModal from '@/components/modals/ClearCartModal';
 import DeleteListsModal from '@/components/modals/DeleteListsModal';
 import LoginRequiredModal from '@/components/modals/LoginRequiredModal';
+import DeleteAccountModal from '@/components/modals/DeleteAccountModal';
 
 const celebrate = async () => {
   const { default: confetti } = await import('canvas-confetti');
@@ -26,7 +27,7 @@ const celebrate = async () => {
  * (sem login) ou o da nuvem (com login), ambos com a mesma interface.
  */
 export default function ShoppingList({ store }) {
-  const { user, enabled: authEnabled, logout } = useAuth();
+  const { user, enabled: authEnabled, logout, deleteAccount } = useAuth();
   const { owned, shared, currentList, products, limits, mode } = store;
 
   const role = currentList?.role ?? 'owner';
@@ -41,6 +42,7 @@ export default function ShoppingList({ store }) {
   const [listsToDelete, setListsToDelete] = useState([]);
   const [shareOpen, setShareOpen] = useState(false);
   const [loginPromptOpen, setLoginPromptOpen] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
   const collectedCount = products.filter((p) => p.collected).length;
   const allCollected = products.length > 0 && collectedCount === products.length;
@@ -113,6 +115,11 @@ export default function ShoppingList({ store }) {
     toast('Você saiu da conta.');
   };
 
+  const handleDeleteAccount = async (confirmEmail) => {
+    await deleteAccount(confirmEmail);
+    toast('Conta excluída. Você pode reativá-la cadastrando o mesmo e-mail.');
+  };
+
   const sidebar = (onNavigate) => (
     <Sidebar
       owned={owned}
@@ -125,6 +132,7 @@ export default function ShoppingList({ store }) {
       onCreateList={handleCreateList}
       onDeleteLists={() => setDeleteListsOpen(true)}
       onLogout={handleLogout}
+      onDeleteAccount={() => setDeleteAccountOpen(true)}
       onNavigate={onNavigate}
     />
   );
@@ -222,6 +230,15 @@ export default function ShoppingList({ store }) {
       />
 
       <LoginRequiredModal open={loginPromptOpen} onOpenChange={setLoginPromptOpen} />
+
+      {user && (
+        <DeleteAccountModal
+          open={deleteAccountOpen}
+          onOpenChange={setDeleteAccountOpen}
+          email={user.email}
+          onConfirm={handleDeleteAccount}
+        />
+      )}
 
       {user && (
         <ShareDialog
