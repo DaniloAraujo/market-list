@@ -199,7 +199,8 @@ export function useCloudStore(user) {
       const listId = latest.current.currentId;
       const { item } = await api(`/v1/lists/${listId}/items`, {
         method: 'POST',
-        body: toApiFields({ ...product }),
+        // Sem categoria escolhida, vai como "outros" (igual ao modo local).
+        body: toApiFields({ ...product, category: product.category || 'outros' }),
       });
       upsert(listId, toProduct(item));
     },
