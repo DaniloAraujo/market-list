@@ -113,7 +113,7 @@ export default function ProductList({
             )}
           </div>
           {!readOnly && (
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Ações da lista">
                 <MoreHorizontal />

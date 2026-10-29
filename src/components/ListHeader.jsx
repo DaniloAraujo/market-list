@@ -42,7 +42,7 @@ export default function ListHeader({ list, readOnlyTitle, connection, canDelete,
           <Share2 /> <span className="hidden sm:inline">Compartilhar</span>
         </Button>
         {(guest || canDelete) && (
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon-sm" className="shrink-0" aria-label="Opções da lista">
                 <MoreHorizontal />

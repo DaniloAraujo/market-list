@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { releasePointerLock } from '@/lib/releasePointerLock';
 
 function ConfirmModal({ open, onOpenChange, title, description, confirmLabel, busyLabel, onConfirm }) {
   const [busy, setBusy] = useState(false);
@@ -19,6 +20,7 @@ function ConfirmModal({ open, onOpenChange, title, description, confirmLabel, bu
       await onConfirm();
       onOpenChange(false);
     } finally {
+      releasePointerLock();
       setBusy(false);
     }
   };
