@@ -16,10 +16,6 @@ const EMOJIS = [
   '🎉', '🎂', '🎁', '🎈', '🎮', '⚽', '🏋️', '🐶', '🐱', '🐾', '👶', '💼', '💰', '📦', '⭐', '❤️',
 ];
 
-/**
- * Cria e remove as categorias próprias da lista (nome + emoji).
- * `onCreated` recebe a categoria criada, para quem abriu o diálogo já poder selecioná-la.
- */
 export default function CategoriesDialog({ open, onOpenChange, onCreated }) {
   const { custom, create, remove, maxCustom } = useCategories();
   const [name, setName] = useState('');

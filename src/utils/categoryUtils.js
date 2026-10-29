@@ -1,7 +1,5 @@
-/** Categoria usada quando nenhuma é escolhida. Ela não ganha cor: cor só marca uma escolha. */
 export const DEFAULT_CATEGORY = 'outros';
 
-/** Classes (claro/escuro) de cada tom. Strings completas para o Tailwind enxergá-las. */
 const TONES = {
   green: 'bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300',
   red: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300',
@@ -23,7 +21,6 @@ const TONES = {
   stone: 'bg-stone-200 text-stone-800 dark:bg-stone-500/20 dark:text-stone-300',
 };
 
-/** Categorias padrão. As próprias de cada lista são somadas a estas (ver resolveCategory). */
 export const BUILTIN_CATEGORIES = [
   { key: 'acougue', label: 'Açougue', emoji: '🥩', tone: 'red' },
   { key: 'alimentos', label: 'Alimentos', emoji: '🍝', tone: 'orange' },
@@ -42,22 +39,16 @@ export const BUILTIN_CATEGORIES = [
 
 const BUILTIN_BY_KEY = new Map(BUILTIN_CATEGORIES.map((c) => [c.key, c]));
 
-/** Chaves das categorias padrão (usado como lista de valores válidos). */
 export const CATEGORIES = BUILTIN_CATEGORIES.map((c) => c.key);
 
 const CUSTOM_TONES = ['rose', 'teal', 'sky', 'lime', 'fuchsia', 'orange', 'indigo', 'emerald'];
 
-/** Cor estável de uma categoria própria, derivada do id dela. */
 const toneForCustom = (id) => {
   let hash = 0;
   for (const char of id) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
   return CUSTOM_TONES[hash % CUSTOM_TONES.length];
 };
 
-/**
- * Descreve uma categoria pela chave: padrão ou própria (`custom` = categorias da lista).
- * Chave desconhecida (ex.: categoria apagada) cai em "Outros".
- */
 export function resolveCategory(key, custom = []) {
   const own = custom.find((c) => c.id === key);
   if (own) {
@@ -67,7 +58,6 @@ export function resolveCategory(key, custom = []) {
   return { ...builtin, isDefault: builtin.key === DEFAULT_CATEGORY, custom: false };
 }
 
-/** Classes de cor de uma categoria; vazio para "Outros", que só indica que nada foi escolhido. */
 export const categoryToneClasses = (category) => (category.isDefault ? '' : TONES[category.tone]);
 
 export const getCategoryLabel = (key, custom = []) => resolveCategory(key, custom).label;

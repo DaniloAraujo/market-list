@@ -13,10 +13,6 @@ const ROLE_TEXT = {
   editor: { label: 'ler e editar', Icon: Pencil },
 };
 
-/**
- * Tela aberta pelo link de convite. Mostra quem convidou e, estando logado, entra na lista
- * (ela passa a aparecer na aba "Convidado"). Sem login, leva ao login e volta para cá.
- */
 export default function InvitePage() {
   const { token } = useParams();
   const { status, user } = useAuth();
@@ -44,7 +40,6 @@ export default function InvitePage() {
       try {
         localStorage.setItem(`cloud:current:${user.id}`, list.id);
       } catch {
-        // sem storage: a lista aparece na aba Convidado, só não abre sozinha
       }
       toast.success(`Você entrou na lista "${list.name}"`);
       navigate('/', { replace: true });

@@ -19,11 +19,6 @@ const summarize = ({ category, quantity, priceCents }, custom) =>
     .filter(Boolean)
     .join(' · ');
 
-/**
- * `onAdd` devolve uma promessa com true quando o item foi aceito (a tela só limpa o formulário nesse caso).
- * `blockedReason` troca o formulário por um aviso (somente leitura, lista cheia...).
- * `count`/`max` mostram quantos itens a lista já tem quando há limite.
- */
 export default function AddProductForm({ onAdd, blockedReason, count, max }) {
   const [values, setValues] = useState(EMPTY);
   const [error, setError] = useState('');

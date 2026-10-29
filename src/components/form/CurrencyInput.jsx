@@ -3,10 +3,6 @@ import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/utils/currencyUtils';
 import { cn } from '@/lib/utils';
 
-/**
- * Campo de valor em reais com máscara de centavos (digita 1250 -> 12,50).
- * `value` e `onChange` trabalham com a string de dígitos em centavos.
- */
 const CurrencyInput = forwardRef(({ value, onChange, className, ...props }, ref) => (
   <div className="relative">
     <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">

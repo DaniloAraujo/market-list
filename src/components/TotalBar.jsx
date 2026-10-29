@@ -1,6 +1,5 @@
 import { formatBRL } from '@/utils/currencyUtils';
 
-/** Rodapé fixo e discreto com o total da lista e o que já está no carrinho. */
 export default function TotalBar({ products }) {
   const total = products.reduce((sum, p) => sum + p.unitPrice * p.quantity, 0);
   if (total <= 0) return null;

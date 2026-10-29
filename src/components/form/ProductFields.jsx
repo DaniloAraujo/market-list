@@ -6,10 +6,6 @@ import QuantityStepper from './QuantityStepper';
 import CurrencyInput from './CurrencyInput';
 import { cn } from '@/lib/utils';
 
-/**
- * Campos de um produto, compartilhados entre o formulário de adicionar e o diálogo de editar.
- * `values`: { name, category, quantity, priceCents }
- */
 export const NameField = forwardRef(({ value, error, onChange, label = 'Produto', ...props }, ref) => (
   <Field label={label} error={error}>
     <Input

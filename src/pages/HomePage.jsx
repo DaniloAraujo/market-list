@@ -30,6 +30,5 @@ export default function HomePage() {
       </div>
     );
   }
-  // O key recria a tela ao trocar de conta/sair, recarregando as listas da fonte certa.
   return status === 'authed' ? <CloudHome key={user.id} user={user} /> : <GuestHome key="guest" />;
 }

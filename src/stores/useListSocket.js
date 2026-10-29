@@ -3,15 +3,8 @@ import { ApiError, api } from '@/lib/api';
 
 const PING_MS = 25_000;
 const MAX_BACKOFF_MS = 30_000;
-/** Códigos de fechamento enviados pelo servidor: pessoa removida / lista excluída. */
 const TERMINAL = { 4403: 'removed', 4404: 'deleted' };
 
-/**
- * Mantém um WebSocket aberto na lista indicada e entrega os eventos em `onEvent`.
- * - Pega um ticket novo a cada conexão e reconecta com espera crescente se a rede cair.
- * - `onResync(listId)` roda depois de uma reconexão, para recarregar o que foi perdido nesse intervalo.
- * - `onTerminal('removed' | 'deleted', listId)` roda quando o acesso à lista acabou (não reconecta).
- */
 export function useListSocket(listId, { onEvent, onStatus, onResync, onTerminal }) {
   const handlers = useRef({ onEvent, onStatus, onResync, onTerminal });
   useEffect(() => {
@@ -61,7 +54,6 @@ export function useListSocket(listId, { onEvent, onStatus, onResync, onTerminal 
           try {
             handlers.current.onEvent?.(JSON.parse(message.data), listId);
           } catch {
-            // mensagem fora do formato esperado
           }
         };
         socket.onclose = (event) => {
@@ -75,7 +67,6 @@ export function useListSocket(listId, { onEvent, onStatus, onResync, onTerminal 
         };
       } catch (error) {
         if (stopped) return;
-        // Sem acesso ou lista inexistente: não adianta tentar de novo.
         if (error instanceof ApiError && error.status === 404) {
           handlers.current.onTerminal?.('removed', listId);
           return;
@@ -84,7 +75,6 @@ export function useListSocket(listId, { onEvent, onStatus, onResync, onTerminal 
       }
     }
 
-    // Ao voltar para a aba, reconecta na hora se a conexão caiu enquanto estava em segundo plano.
     const onVisible = () => {
       if (document.visibilityState !== 'visible' || stopped) return;
       if (socket?.readyState === WebSocket.OPEN || socket?.readyState === WebSocket.CONNECTING) return;

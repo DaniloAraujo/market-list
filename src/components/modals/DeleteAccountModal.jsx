@@ -4,10 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Field from '@/components/form/Field';
 
-/**
- * Confirmação de exclusão de conta. A conta é desativada (não apagada): dá para voltar
- * cadastrando o mesmo e-mail ou entrando com o Google.
- */
 export default function DeleteAccountModal({ open, onOpenChange, email, onConfirm }) {
   const [typed, setTyped] = useState('');
   const [busy, setBusy] = useState(false);

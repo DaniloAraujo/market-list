@@ -8,7 +8,6 @@ const CONNECTION = {
   offline: { label: 'Sem conexão. Tentando reconectar...', dot: 'bg-destructive' },
 };
 
-/** Título editável (só o dono renomeia), botão de compartilhar e quem compartilhou, se for convidado. */
 export default function ListHeader({ list, readOnlyTitle, connection, onRename, onCommit, onShare }) {
   const name = list?.name ?? '';
   const guest = list && list.role !== 'owner';

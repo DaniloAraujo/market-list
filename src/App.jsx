@@ -20,7 +20,6 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/privacidade" element={<PrivacyPage />} />
           <Route path="/termos" element={<TermsPage />} />
-          {/* Sem API configurada o app é só local: login e convites não existem */}
           {API_ENABLED && (
             <>
               <Route path="/login" element={<LoginPage />} />

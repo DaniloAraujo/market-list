@@ -28,10 +28,6 @@ function Option({ category }) {
 const builtins = BUILTIN_CATEGORIES.filter((c) => c.key !== DEFAULT_CATEGORY);
 const fallback = BUILTIN_CATEGORIES.find((c) => c.key === DEFAULT_CATEGORY);
 
-/**
- * Seletor de categoria. A cor aparece só depois que uma categoria é escolhida ("Outros" fica neutro).
- * O último item abre o diálogo para criar categorias próprias, com emoji.
- */
 const CategorySelect = forwardRef(({ value, onValueChange, placeholder = 'Selecione', ...props }, ref) => {
   const { custom } = useCategories();
   const [dialogOpen, setDialogOpen] = useState(false);

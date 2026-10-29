@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Brand } from '@/components/Sidebar';
 
-/** Barra superior exibida só no mobile; o menu lateral abre como gaveta. */
 export default function Header({ open, onOpenChange, children }) {
   return (
     <header className="sticky top-0 z-30 flex items-center gap-1 border-b bg-background px-2 py-1.5 lg:hidden">

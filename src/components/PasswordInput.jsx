@@ -2,7 +2,6 @@ import { forwardRef, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
-/** Campo de senha com botão para mostrar/ocultar. */
 const PasswordInput = forwardRef((props, ref) => {
   const [visible, setVisible] = useState(false);
   return (

@@ -1,7 +1,3 @@
-/**
- * Marca do app: uma lista de tarefas marcadas. Genérica de propósito, serve para qualquer tipo de lista.
- * O mesmo desenho está em public/favicon.svg e gera os ícones de scripts/generate-icons.mjs.
- */
 export default function Logo({ className = 'h-8 w-8', title }) {
   return (
     <svg

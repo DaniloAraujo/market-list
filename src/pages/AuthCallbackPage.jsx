@@ -6,7 +6,6 @@ import { pendingNext } from '@/auth/pending-next';
 import AuthShell from '@/components/AuthShell';
 import { Button } from '@/components/ui/button';
 
-/** Destino do retorno do Google: troca o código de uso único por uma sessão e volta ao app. */
 export default function AuthCallbackPage() {
   const { exchangeCode } = useAuth();
   const navigate = useNavigate();
@@ -17,7 +16,6 @@ export default function AuthCallbackPage() {
   const error = code ? exchangeError : 'Não foi possível concluir o login.';
 
   useEffect(() => {
-    // O código é de uso único: a guarda evita dois envios no modo estrito do React.
     if (!code || started.current) return;
     started.current = true;
 

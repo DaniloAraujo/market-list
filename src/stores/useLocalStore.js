@@ -10,10 +10,6 @@ const summarize = (list) => ({
   collectedCount: list.products.filter((p) => p.collected).length,
 });
 
-/**
- * Store do modo sem login: listas no localStorage, sem limites.
- * Expõe a mesma interface do store da nuvem (ver useCloudStore) para a tela não precisar saber a origem.
- */
 export function useLocalStore() {
   const local = useShoppingLists();
 

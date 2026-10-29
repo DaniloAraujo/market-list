@@ -246,7 +246,6 @@ function MembersSection({ owner, members, isOwner, currentUserId, listId, onChan
   );
 }
 
-/** Compartilhamento da lista: o dono gera convites e gerencia pessoas; convidados veem quem tem acesso. */
 export default function ShareDialog({ open, onOpenChange, list, user, membersVersion, onLeft }) {
   const isOwner = list?.role === 'owner';
   const [data, setData] = useState({ invites: [], members: [], owner: null });
@@ -261,10 +260,8 @@ export default function ShareDialog({ open, onOpenChange, list, user, membersVer
     return { owner: members.owner, members: members.members, invites: invites.invites };
   }, [listId, isOwner]);
 
-  // Recarrega depois de uma ação feita aqui dentro (convite criado, pessoa removida...)
   const load = useCallback(() => fetchData().then(setData).catch((error) => toast.error(error.message)), [fetchData]);
 
-  // Carrega ao abrir e quando alguém entra/sai/muda de papel (evento em tempo real).
   useEffect(() => {
     if (!open || !listId) return undefined;
     let cancelled = false;

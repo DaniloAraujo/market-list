@@ -21,7 +21,6 @@ const dismiss = (userId) => {
   try {
     localStorage.setItem(dismissKey(userId), '1');
   } catch {
-    // sem storage: o aviso pode voltar na próxima vez
   }
 };
 
@@ -33,10 +32,6 @@ const toImportItem = (product) => ({
   collected: Boolean(product.collected),
 });
 
-/**
- * Logo após o login, oferece levar para a conta as listas que estavam salvas só neste navegador.
- * Respeita o limite de listas da conta e o de itens por lista; o que não puder ir continua aqui.
- */
 export default function ImportListsModal({ userId, store }) {
   const [candidates] = useState(() => readStoredLists().filter((l) => l.products?.length > 0));
   const [selected, setSelected] = useState(null);

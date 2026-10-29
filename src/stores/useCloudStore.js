@@ -5,7 +5,6 @@ import { useListSocket } from './useListSocket';
 
 const currentKey = (userId) => `cloud:current:${userId}`;
 
-/** Item da API (centavos) -> produto da tela (reais). */
 const toProduct = (item) => ({
   id: item.id,
   name: item.name,
@@ -19,7 +18,6 @@ const toProduct = (item) => ({
 
 const toCents = (reais) => Math.round((reais || 0) * 100);
 
-/** Campos editáveis do produto -> corpo da API. */
 const toApiFields = (fields) => {
   const body = {};
   if ('name' in fields) body.name = fields.name;
@@ -47,10 +45,6 @@ const GONE_MESSAGES = {
   deleted: 'Esta lista foi excluída pelo dono.',
 };
 
-/**
- * Store do modo com login: listas na API, atualizadas em tempo real por WebSocket.
- * Mesma interface do store local (useLocalStore), com `mode: 'cloud'`, papéis e limites.
- */
 export function useCloudStore(user) {
   const [lists, setLists] = useState({ owned: [], shared: [] });
   const [limits, setLimits] = useState({ maxLists: 3, maxItemsPerList: 150 });
@@ -61,18 +55,14 @@ export function useCloudStore(user) {
   const [connection, setConnection] = useState('connecting');
   const [membersVersion, setMembersVersion] = useState(0);
 
-  // Lista aberta: a preferida se ainda existir, senão a primeira disponível.
   const allLists = useMemo(() => [...lists.owned, ...lists.shared], [lists]);
   const currentId = allLists.some((l) => l.id === preferredId) ? preferredId : (allLists[0]?.id ?? null);
 
-  // Cópias "vivas" para callbacks assíncronos (evitam ler estado velho).
   const latest = useRef({ itemsByList, lists, currentId });
   useEffect(() => {
     latest.current = { itemsByList, lists, currentId };
   });
   const savedNames = useRef({});
-
-  // --- Carregamento ---------------------------------------------------------
 
   const patchSummary = useCallback((summary) => {
     savedNames.current[summary.id] = summary.name;
@@ -124,12 +114,9 @@ export function useCloudStore(user) {
     try {
       localStorage.setItem(currentKey(user.id), currentId);
     } catch {
-      // sem storage: a lista aberta não é lembrada
     }
     loadList(currentId);
   }, [currentId, user.id, loadList]);
-
-  // --- Tempo real -------------------------------------------------------------
 
   const upsert = useCallback((listId, product) => {
     setItemsByList((prev) => {
@@ -149,7 +136,6 @@ export function useCloudStore(user) {
     });
   }, []);
 
-  // Os itens da categoria removida voltam para "outros" (o servidor faz o mesmo).
   const removeCategoryFromState = useCallback((listId, categoryId) => {
     setCategoriesByList((prev) => ({ ...prev, [listId]: (prev[listId] ?? []).filter((c) => c.id !== categoryId) }));
     setItemsByList((prev) => ({
@@ -178,7 +164,6 @@ export function useCloudStore(user) {
           removeCategoryFromState(listId, event.categoryId);
           break;
         case 'list.updated': {
-          // Não sobrescreve o nome enquanto a própria pessoa o está digitando.
           const typing = document.activeElement?.getAttribute?.('aria-label') === 'Nome da lista';
           if (!typing) patchSummary({ id: listId, name: event.list.name });
           break;
@@ -187,9 +172,7 @@ export function useCloudStore(user) {
         case 'member.updated':
         case 'member.removed':
           setMembersVersion((v) => v + 1);
-          // Atualiza o contador "Compartilhada com N pessoas".
           refreshLists().catch(() => {});
-          // Se o meu próprio papel mudou, recarrega para liberar/bloquear a edição.
           if (event.type === 'member.updated' && event.member.userId === user.id) loadList(listId);
           break;
         default:
@@ -212,14 +195,11 @@ export function useCloudStore(user) {
     },
   });
 
-  // Ao voltar para a aba, atualiza os totais das outras listas.
   useEffect(() => {
     const onVisible = () => document.visibilityState === 'visible' && refreshLists().catch(() => {});
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [refreshLists]);
-
-  // --- Ações sobre itens (otimistas: mudam a tela na hora e desfazem se a API recusar) ---------
 
   const itemsOf = (listId) => latest.current.itemsByList[listId] ?? [];
 
@@ -228,7 +208,6 @@ export function useCloudStore(user) {
       const listId = latest.current.currentId;
       const { item } = await api(`/v1/lists/${listId}/items`, {
         method: 'POST',
-        // Sem categoria escolhida, vai como "outros" (igual ao modo local).
         body: toApiFields({ ...product, category: product.category || 'outros' }),
       });
       upsert(listId, toProduct(item));
@@ -301,10 +280,6 @@ export function useCloudStore(user) {
   const clearPrices = useCallback(() => bulk('clear_prices', (items) => items.map((p) => ({ ...p, unitPrice: 0 }))), [bulk]);
   const clearProducts = useCallback(() => bulk('clear_all', () => []), [bulk]);
 
-  /**
-   * Desfazer: leva a lista de volta ao estado do `snapshot` recriando, corrigindo ou removendo
-   * só o que for diferente (itens apagados voltam com ids novos, o autor passa a ser quem desfez).
-   */
   const restoreProducts = useCallback(
     async (snapshot) => {
       const listId = latest.current.currentId;
@@ -367,8 +342,6 @@ export function useCloudStore(user) {
     },
     [removeCategoryFromState]
   );
-
-  // --- Ações sobre listas ---------------------------------------------------------------
 
   const createList = useCallback(async () => {
     const name = `Lista ${latest.current.lists.owned.length + 1}`;

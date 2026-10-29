@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import Logo from '@/components/Logo';
 
-/** Moldura das telas de login, cadastro, recuperação e convite. */
 export default function AuthShell({ title, subtitle, children, footer }) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-4 py-10">

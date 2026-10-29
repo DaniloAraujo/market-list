@@ -12,7 +12,6 @@ export default function VerifyEmailPage() {
   const started = useRef(false);
 
   useEffect(() => {
-    // O link é de uso único: a guarda evita dois envios no modo estrito do React.
     if (!token || started.current) return;
     started.current = true;
     api('/v1/auth/verify-email', { method: 'POST', body: { token }, token: null })

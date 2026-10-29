@@ -13,12 +13,10 @@ const loadLists = () => {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (Array.isArray(saved) && saved.length > 0) return saved;
   } catch {
-    // dado corrompido: começa uma lista nova
   }
   return [makeList('Lista 1')];
 };
 
-// Lista vinda de um link compartilhado (?list=...), se houver
 const readSharedList = () => {
   const shared = new URLSearchParams(window.location.search).get('list');
   if (!shared) return null;
@@ -41,7 +39,6 @@ const init = () => {
   return { lists: [...saved, imported], currentId: imported.id };
 };
 
-/** Listas salvas neste navegador (modo sem login). */
 export const readStoredLists = () => {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -51,7 +48,6 @@ export const readStoredLists = () => {
   }
 };
 
-/** Remove listas do armazenamento local, por exemplo depois de importá-las para a conta. */
 export const removeStoredLists = (ids) => {
   const remaining = readStoredLists().filter((list) => !ids.includes(list.id));
   if (remaining.length > 0) localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining));
@@ -69,7 +65,6 @@ export function useShoppingLists() {
     if (lists.length > 0) localStorage.setItem(STORAGE_KEY, JSON.stringify(lists));
   }, [lists]);
 
-  // A lista compartilhada já foi importada na inicialização; limpa o parâmetro da URL
   useEffect(() => {
     if (window.location.search.includes('list=')) {
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -96,7 +91,6 @@ export function useShoppingLists() {
     [listId]
   );
 
-  // Se o nome ficar vazio ao sair do campo, volta para "Lista N"
   const commitListName = useCallback(() => {
     setLists((prev) =>
       prev.map((l, i) => (l.id === listId && l.name.trim() === '' ? { ...l, name: `Lista ${i + 1}` } : l))
@@ -132,7 +126,6 @@ export function useShoppingLists() {
     [lists, listId]
   );
 
-  // Os itens que usavam a categoria voltam para "outros".
   const removeCategory = useCallback(
     (categoryId) =>
       setLists((prev) =>

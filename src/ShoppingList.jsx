@@ -23,10 +23,6 @@ const celebrate = async () => {
   confetti({ particleCount: 90, spread: 70, origin: { y: 0.7 }, colors, disableForReducedMotion: true });
 };
 
-/**
- * Tela principal. Não sabe de onde vêm as listas: recebe um `store`, que é o armazenamento local
- * (sem login) ou o da nuvem (com login), ambos com a mesma interface.
- */
 export default function ShoppingList({ store }) {
   const { user, enabled: authEnabled, logout, deleteAccount } = useAuth();
   const { owned, shared, currentList, products, limits, mode } = store;
@@ -48,7 +44,6 @@ export default function ShoppingList({ store }) {
   const collectedCount = products.filter((p) => p.collected).length;
   const allCollected = products.length > 0 && collectedCount === products.length;
 
-  // Comemora quando o último item da lista é marcado (e não quando uma lista cheia acabou de carregar)
   const wasComplete = useRef(allCollected);
   const lastListId = useRef(currentList?.id);
   const lastCount = useRef(products.length);
@@ -68,7 +63,6 @@ export default function ShoppingList({ store }) {
     wasComplete.current = allCollected;
   }, [allCollected, currentList?.id, products.length]);
 
-  // Executa uma ação sobre os produtos e oferece desfazer
   const withUndo = (message, action) => {
     const snapshot = products;
     action();

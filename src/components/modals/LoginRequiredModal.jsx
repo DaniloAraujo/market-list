@@ -3,7 +3,6 @@ import { Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-/** Aviso exibido ao tentar compartilhar sem estar logado. */
 export default function LoginRequiredModal({ open, onOpenChange }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -74,7 +74,7 @@
     text-size-adjust: 100%;
     color-scheme: light;
   }
-  /* Sem atraso nem zoom de toque duplo em botões, links e campos. */
+
   a,
   button,
   input,
@@ -83,10 +83,7 @@
   [role="button"] {
     touch-action: manipulation;
   }
-  /*
-   * O Safari do iPhone aproxima a tela ao focar um campo com fonte menor que 16px.
-   * Em telas pequenas, todo campo sem tamanho próprio usa 16px.
-   */
+
   @media (max-width: 767px) {
     input,
     select,

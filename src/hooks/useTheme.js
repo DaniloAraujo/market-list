@@ -40,7 +40,6 @@ export function useTheme() {
     try {
       localStorage.setItem(STORAGE_KEY, next);
     } catch {
-      // storage indisponível: o tema vale só nesta sessão
     }
     listeners.forEach((l) => l());
   }, []);

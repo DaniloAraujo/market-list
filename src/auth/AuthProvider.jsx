@@ -3,10 +3,6 @@ import { toast } from 'sonner';
 import { API_ENABLED, api, onUnauthorized, tokenStorage } from '@/lib/api';
 import { AuthContext } from './auth-context';
 
-/**
- * Estado de autenticação do app.
- * status: 'loading' (conferindo o token salvo), 'guest' (sem login) ou 'authed'.
- */
 export default function AuthProvider({ children }) {
   const [state, setState] = useState(() => ({
     status: API_ENABLED && tokenStorage.get() ? 'loading' : 'guest',
@@ -20,7 +16,6 @@ export default function AuthProvider({ children }) {
       .then(({ user }) => !cancelled && setState({ status: 'authed', user }))
       .catch((error) => {
         if (cancelled) return;
-        // Só descarta o token se ele foi recusado; falha de rede mantém o login para tentar de novo.
         if (error.status === 401) tokenStorage.clear();
         setState({ status: 'guest', user: null });
       });
@@ -60,13 +55,11 @@ export default function AuthProvider({ children }) {
     try {
       await api('/v1/auth/logout', { method: 'POST', body: {} });
     } catch {
-      // mesmo sem conseguir avisar o servidor, encerramos localmente
     }
     tokenStorage.clear();
     setState({ status: 'guest', user: null });
   }, []);
 
-  /** Exclui (desativa) a conta e encerra a sessão neste aparelho. */
   const deleteAccount = useCallback(async (confirmEmail) => {
     await api('/v1/me', { method: 'DELETE', body: { confirmEmail } });
     tokenStorage.clear();

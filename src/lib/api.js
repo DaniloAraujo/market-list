@@ -1,6 +1,5 @@
 const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 
-/** Sem VITE_API_URL o app roda só com listas locais (login e compartilhamento ficam ocultos). */
 export const API_ENABLED = BASE_URL !== '';
 
 const TOKEN_KEY = 'auth:token';
@@ -17,19 +16,16 @@ export const tokenStorage = {
     try {
       localStorage.setItem(TOKEN_KEY, token);
     } catch {
-      // storage indisponível: o login vale só até recarregar
     }
   },
   clear() {
     try {
       localStorage.removeItem(TOKEN_KEY);
     } catch {
-      // nada a limpar
     }
   },
 };
 
-/** Erro da API. `code` é estável (ver README do backend) e `message` já vem em português. */
 export class ApiError extends Error {
   constructor(status, code, message, details) {
     super(message);
@@ -42,7 +38,6 @@ export class ApiError extends Error {
 
 const unauthorizedListeners = new Set();
 
-/** Avisa quando a API recusa o token salvo (sessão expirou ou foi encerrada). */
 export function onUnauthorized(listener) {
   unauthorizedListeners.add(listener);
   return () => unauthorizedListeners.delete(listener);
@@ -70,7 +65,6 @@ export async function api(path, { method = 'GET', body, token = tokenStorage.get
   try {
     payload = await response.json();
   } catch {
-    // resposta sem corpo JSON
   }
 
   if (!response.ok) {
@@ -86,6 +80,5 @@ export async function api(path, { method = 'GET', body, token = tokenStorage.get
   return payload;
 }
 
-/** URL para iniciar o login com Google (redirecionamento de página inteira). */
 export const googleLoginUrl = (next = '/') =>
   `${BASE_URL}/v1/auth/google/start?redirect=${encodeURIComponent(next)}`;

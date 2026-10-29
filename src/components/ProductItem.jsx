@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils';
 
 const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete, readOnly = false, currentUserId }, ref) => {
   const { name, category, quantity, unitPrice, collected, updatedBy } = product;
-  // Em listas compartilhadas, mostra quem mexeu por último quando não foi a própria pessoa.
   const editedByOther = updatedBy && updatedBy.id !== currentUserId ? updatedBy.name : null;
   const hasPrice = unitPrice > 0;
   const { custom } = useCategories();

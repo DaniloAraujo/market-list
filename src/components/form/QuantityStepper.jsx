@@ -6,7 +6,6 @@ const MAX = 999;
 
 const clamp = (n) => Math.min(MAX, Math.max(MIN, n));
 
-/** Seletor de quantidade com botões -/+ e digitação direta. `value` é um número. */
 export default function QuantityStepper({ value, onChange, className, ...props }) {
   const step = (delta) => onChange(clamp((Number(value) || MIN) + delta));
 
