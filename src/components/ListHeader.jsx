@@ -1,4 +1,4 @@
-import { Eye, Pencil, Share2 } from 'lucide-react';
+import { Eye, Pencil, Share2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -12,6 +12,7 @@ const CONNECTION = {
 export default function ListHeader({ list, readOnlyTitle, connection, onRename, onCommit, onShare }) {
   const name = list?.name ?? '';
   const guest = list && list.role !== 'owner';
+  const sharedWith = list?.role === 'owner' ? (list.memberCount ?? 0) : 0;
   const status = connection && CONNECTION[connection];
 
   return (
@@ -41,6 +42,17 @@ export default function ListHeader({ list, readOnlyTitle, connection, onRename, 
           <Share2 /> <span className="hidden sm:inline">Compartilhar</span>
         </Button>
       </div>
+
+      {sharedWith > 0 && (
+        <button
+          type="button"
+          onClick={onShare}
+          className="flex items-center gap-1.5 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        >
+          <Users className="h-3.5 w-3.5" />
+          Compartilhada com {sharedWith} {sharedWith === 1 ? 'pessoa' : 'pessoas'} · ver e gerenciar
+        </button>
+      )}
 
       {guest && (
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground">

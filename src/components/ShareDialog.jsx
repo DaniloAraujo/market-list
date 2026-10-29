@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Check, Copy, Eye, Link2, Pencil, Share2, UserMinus } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -145,6 +154,9 @@ function InviteSection({ listId, invites, onChanged }) {
 }
 
 function MembersSection({ owner, members, isOwner, currentUserId, listId, onChanged, onLeft }) {
+  const [removing, setRemoving] = useState(null);
+  const [busy, setBusy] = useState(false);
+
   const changeRole = async (userId, role) => {
     try {
       await api(`/v1/lists/${listId}/members/${userId}`, { method: 'PATCH', body: { role } });
@@ -154,13 +166,21 @@ function MembersSection({ owner, members, isOwner, currentUserId, listId, onChan
     }
   };
 
-  const remove = async (userId) => {
+  const confirmRemove = async () => {
+    const { userId, name } = removing;
+    setBusy(true);
     try {
       await api(`/v1/lists/${listId}/members/${userId}`, { method: 'DELETE' });
+      setRemoving(null);
       if (userId === currentUserId) onLeft();
-      else onChanged();
+      else {
+        toast(`${name} foi removido(a) da lista.`);
+        onChanged();
+      }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -176,7 +196,10 @@ function MembersSection({ owner, members, isOwner, currentUserId, listId, onChan
           const me = member.userId === currentUserId;
           return (
             <li key={member.userId} className="flex items-center gap-2 px-3 py-2 text-sm">
-              <span className="flex-1 truncate">{member.name}{me && ' (você)'}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate">{member.name}{me && ' (você)'}</span>
+                {member.email && <span className="block truncate text-xs text-muted-foreground">{member.email}</span>}
+              </span>
               {isOwner ? (
                 <RoleSelect value={member.role} onChange={(role) => changeRole(member.userId, role)} />
               ) : (
@@ -185,13 +208,12 @@ function MembersSection({ owner, members, isOwner, currentUserId, listId, onChan
               {(isOwner || me) && (
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="sm"
                   className="text-muted-foreground hover:text-destructive"
-                  onClick={() => remove(member.userId)}
-                  aria-label={me ? 'Sair da lista' : `Remover ${member.name}`}
-                  title={me ? 'Sair da lista' : 'Remover'}
+                  onClick={() => setRemoving(member)}
+                  aria-label={me ? 'Sair da lista' : `Remover ${member.name} da lista`}
                 >
-                  <UserMinus />
+                  <UserMinus /> {me ? 'Sair' : 'Remover'}
                 </Button>
               )}
             </li>
@@ -199,6 +221,27 @@ function MembersSection({ owner, members, isOwner, currentUserId, listId, onChan
         })}
       </ul>
       {members.length === 0 && <p className="text-xs text-muted-foreground">Ninguém além de você tem acesso a esta lista.</p>}
+
+      <AlertDialog open={!!removing} onOpenChange={(next) => !next && !busy && setRemoving(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {removing?.userId === currentUserId ? 'Sair da lista?' : `Remover ${removing?.name}?`}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {removing?.userId === currentUserId
+                ? 'Você perde o acesso a esta lista. Para voltar, o dono precisa convidar você de novo.'
+                : `${removing?.name} perde o acesso a esta lista agora. Você pode convidar a pessoa de novo depois.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>Cancelar</AlertDialogCancel>
+            <Button variant="destructive" onClick={confirmRemove} disabled={busy}>
+              {busy ? 'Removendo...' : removing?.userId === currentUserId ? 'Sair da lista' : 'Remover'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }

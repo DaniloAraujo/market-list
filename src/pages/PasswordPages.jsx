@@ -36,6 +36,7 @@ export function ForgotPasswordPage() {
       {sent ? (
         <p className="text-sm">
           Se existir uma conta com <strong>{email}</strong>, você receberá o link em instantes. Ele vale por 1 hora.
+          Não chegou? Olhe a pasta de <strong>spam</strong> ou lixo eletrônico.
         </p>
       ) : (
         <form onSubmit={submit} className="space-y-4" noValidate>

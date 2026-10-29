@@ -101,6 +101,10 @@ export default function LoginPage() {
           <p className="text-sm">
             Enviamos um e-mail para <strong>{registeredEmail}</strong>. Abra o link para confirmar sua conta e depois entre. Se este e-mail já teve uma conta desativada, o link serve para reativá-la.
           </p>
+          <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+            Não encontrou? Olhe também a pasta de <strong className="text-foreground">spam</strong> ou lixo eletrônico e, se o
+            e-mail estiver lá, marque como “não é spam”. Pode levar alguns minutos para chegar.
+          </p>
           <Button variant="ghost" size="sm" onClick={resend} disabled={resent}>
             {resent ? 'E-mail reenviado' : 'Reenviar e-mail'}
           </Button>

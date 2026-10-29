@@ -160,6 +160,8 @@ export function useCloudStore(user) {
         case 'member.updated':
         case 'member.removed':
           setMembersVersion((v) => v + 1);
+          // Atualiza o contador "Compartilhada com N pessoas".
+          refreshLists().catch(() => {});
           // Se o meu próprio papel mudou, recarrega para liberar/bloquear a edição.
           if (event.type === 'member.updated' && event.member.userId === user.id) loadList(listId);
           break;
@@ -167,7 +169,7 @@ export function useCloudStore(user) {
           break;
       }
     },
-    [upsert, setItems, patchSummary, loadList, user.id]
+    [upsert, setItems, patchSummary, loadList, refreshLists, user.id]
   );
 
   useListSocket(currentId, {
