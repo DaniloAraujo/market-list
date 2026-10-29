@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/button';
 import ClearCartModal from '@/components/modals/ClearCartModal';
 import DeleteListsModal from '@/components/modals/DeleteListsModal';
 import LoginRequiredModal from '@/components/modals/LoginRequiredModal';
+import { DeleteListModal, LeaveListModal } from '@/components/modals/ListConfirmModals';
+import { api } from '@/lib/api';
 import { useStore } from '@/stores/store-context';
 
 const celebrate = async () => {
@@ -38,6 +40,8 @@ export default function ListScreen() {
   const [listsToDelete, setListsToDelete] = useState([]);
   const [shareOpen, setShareOpen] = useState(false);
   const [newListOpen, setNewListOpen] = useState(false);
+  const [deleteOneOpen, setDeleteOneOpen] = useState(false);
+  const [leaveOpen, setLeaveOpen] = useState(false);
   const [loginPromptOpen, setLoginPromptOpen] = useState(false);
 
   const collectedCount = products.filter((p) => p.collected).length;
@@ -102,6 +106,23 @@ export default function ListScreen() {
     }
   };
 
+  const handleDeleteCurrent = async () => {
+    const { id, name } = currentList;
+    await store.deleteLists([id]);
+    toast(`Lista “${name}” excluída`);
+  };
+
+  const handleLeaveCurrent = async () => {
+    try {
+      await api(`/v1/lists/${currentList.id}/members/${user.id}`, { method: 'DELETE' });
+      toast('Você saiu da lista.');
+      await store.refresh();
+    } catch (error) {
+      toast.error(error.message);
+      throw error;
+    }
+  };
+
   const handleDeleteLists = async () => {
     const count = listsToDelete.length;
     await store.deleteLists(listsToDelete);
@@ -150,6 +171,9 @@ export default function ListScreen() {
               list={currentList}
               readOnlyTitle={!isOwner}
               connection={store.connection}
+              canDelete={isOwner && (mode !== 'local' || owned.findIndex((entry) => entry.id === currentList.id) > 0)}
+              onDelete={() => setDeleteOneOpen(true)}
+              onLeave={() => setLeaveOpen(true)}
               onRename={store.renameList}
               onCommit={store.commitListName}
               onShare={handleShare}
@@ -204,6 +228,15 @@ export default function ListScreen() {
         onSelectedChange={setListsToDelete}
         onConfirm={handleDeleteLists}
       />
+
+      <DeleteListModal
+        open={deleteOneOpen}
+        onOpenChange={setDeleteOneOpen}
+        list={currentList}
+        onConfirm={handleDeleteCurrent}
+      />
+
+      <LeaveListModal open={leaveOpen} onOpenChange={setLeaveOpen} list={currentList} onConfirm={handleLeaveCurrent} />
 
       <NewListDialog
         open={newListOpen}

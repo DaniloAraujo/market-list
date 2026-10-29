@@ -1,5 +1,6 @@
-import { Eye, Pencil, Share2, Users } from 'lucide-react';
+import { Eye, LogOut, MoreHorizontal, Pencil, Share2, Trash2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 const CONNECTION = {
@@ -8,7 +9,7 @@ const CONNECTION = {
   offline: { label: 'Sem conexão. Tentando reconectar...', dot: 'bg-destructive' },
 };
 
-export default function ListHeader({ list, readOnlyTitle, connection, onRename, onCommit, onShare }) {
+export default function ListHeader({ list, readOnlyTitle, connection, canDelete, onRename, onCommit, onShare, onDelete, onLeave }) {
   const name = list?.name ?? '';
   const guest = list && list.role !== 'owner';
   const sharedWith = list?.role === 'owner' ? (list.memberCount ?? 0) : 0;
@@ -40,6 +41,26 @@ export default function ListHeader({ list, readOnlyTitle, connection, onRename, 
         <Button variant="outline" size="sm" onClick={onShare} className="shrink-0" aria-label="Compartilhar lista">
           <Share2 /> <span className="hidden sm:inline">Compartilhar</span>
         </Button>
+        {(guest || canDelete) && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon-sm" className="shrink-0" aria-label="Opções da lista">
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {guest ? (
+                <DropdownMenuItem destructive onSelect={onLeave}>
+                  <LogOut /> Sair desta lista
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem destructive onSelect={onDelete}>
+                  <Trash2 /> Excluir esta lista
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {sharedWith > 0 && (

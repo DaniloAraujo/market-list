@@ -189,14 +189,14 @@ function MembersSection({ owner, members, isOwner, currentUserId, listId, onChan
       <h3 className="text-sm font-medium">Pessoas com acesso</h3>
       <ul className="divide-y rounded-lg border">
         <li className="flex items-center gap-2 px-3 py-2 text-sm">
-          <span className="flex-1 truncate">{owner?.name}{owner?.id === currentUserId && ' (você)'}</span>
+          <span className="min-w-0 flex-1 truncate">{owner?.name}{owner?.id === currentUserId && ' (você)'}</span>
           <span className="text-xs text-muted-foreground">Dono</span>
         </li>
         {members.map((member) => {
           const me = member.userId === currentUserId;
           return (
-            <li key={member.userId} className="flex items-center gap-2 px-3 py-2 text-sm">
-              <span className="min-w-0 flex-1">
+            <li key={member.userId} className="flex flex-wrap items-center gap-x-2 gap-y-1.5 px-3 py-2 text-sm">
+              <span className="min-w-0 flex-1 basis-36">
                 <span className="block truncate">{member.name}{me && ' (você)'}</span>
                 {member.email && <span className="block truncate text-xs text-muted-foreground">{member.email}</span>}
               </span>
@@ -209,7 +209,7 @@ function MembersSection({ owner, members, isOwner, currentUserId, listId, onChan
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-muted-foreground hover:text-destructive"
+                  className="ml-auto text-muted-foreground hover:text-destructive"
                   onClick={() => setRemoving(member)}
                   aria-label={me ? 'Sair da lista' : `Remover ${member.name} da lista`}
                 >
@@ -280,13 +280,13 @@ export default function ShareDialog({ open, onOpenChange, list, user, membersVer
           <DialogTitle>Compartilhar “{list?.name}”</DialogTitle>
           <DialogDescription>
             {isOwner
-              ? 'Convide pessoas por link. Elas entram na conta delas e a lista aparece na aba Convidado.'
+              ? 'Convide pessoas por link e gerencie quem tem acesso. Você pode remover alguém quando quiser.'
               : `Só ${list?.owner?.name} pode convidar novas pessoas para esta lista.`}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {isOwner && <InviteSection listId={list.id} invites={data.invites} onChanged={load} />}
+          {isOwner && data.members.length === 0 && <InviteSection listId={list.id} invites={data.invites} onChanged={load} />}
           <MembersSection
             owner={data.owner}
             members={data.members}
@@ -299,6 +299,7 @@ export default function ShareDialog({ open, onOpenChange, list, user, membersVer
               onLeft();
             }}
           />
+          {isOwner && data.members.length > 0 && <InviteSection listId={list.id} invites={data.invites} onChanged={load} />}
         </div>
       </DialogContent>
     </Dialog>
