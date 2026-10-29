@@ -17,6 +17,12 @@ export default function AuthShell({ title, subtitle, children, footer }) {
       </div>
 
       {footer && <div className="mt-4 text-center text-sm text-muted-foreground">{footer}</div>}
+
+      <p className="mt-6 text-center text-xs text-muted-foreground">
+        <Link to="/termos" className="underline-offset-4 hover:underline">Termos de Uso</Link>
+        {' · '}
+        <Link to="/privacidade" className="underline-offset-4 hover:underline">Política de Privacidade</Link>
+      </p>
     </main>
   );
 }

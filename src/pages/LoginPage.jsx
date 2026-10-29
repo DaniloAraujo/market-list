@@ -191,6 +191,13 @@ export default function LoginPage() {
         <Button type="submit" className="w-full" disabled={busy}>
           {busy ? 'Aguarde...' : mode === 'register' ? 'Criar conta' : 'Entrar'}
         </Button>
+        {mode === 'register' && (
+          <p className="text-center text-xs text-muted-foreground">
+            Ao criar a conta, você concorda com os{' '}
+            <Link to="/termos" className="underline underline-offset-4">Termos de Uso</Link> e a{' '}
+            <Link to="/privacidade" className="underline underline-offset-4">Política de Privacidade</Link>.
+          </p>
+        )}
       </form>
 
       <div className="mt-4 flex items-center justify-between text-sm">

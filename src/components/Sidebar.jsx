@@ -176,6 +176,11 @@ export default function Sidebar({
           <span className="text-xs text-muted-foreground">Tema</span>
           <ThemeToggle />
         </div>
+        <p className="px-1 pt-2 text-[11px] text-muted-foreground">
+          <Link to="/termos" className="underline-offset-4 hover:underline">Termos</Link>
+          {' · '}
+          <Link to="/privacidade" className="underline-offset-4 hover:underline">Privacidade</Link>
+        </p>
       </div>
     </div>
   );

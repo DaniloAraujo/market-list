@@ -7,6 +7,7 @@ import HomePage from "@/pages/HomePage";
 import InvitePage from "@/pages/InvitePage";
 import LoginPage from "@/pages/LoginPage";
 import { ForgotPasswordPage, ResetPasswordPage } from "@/pages/PasswordPages";
+import { PrivacyPage, TermsPage } from "@/pages/LegalPages";
 import VerifyEmailPage from "@/pages/VerifyEmailPage";
 
 export default function App() {
@@ -15,6 +16,8 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/privacidade" element={<PrivacyPage />} />
+          <Route path="/termos" element={<TermsPage />} />
           {/* Sem API configurada o app é só local: login e convites não existem */}
           {API_ENABLED && (
             <>
