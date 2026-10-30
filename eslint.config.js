@@ -27,4 +27,8 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^(motion|[A-Z_])', argsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    files: ['**/*.test.{js,jsx}'],
+    languageOptions: { globals: { ...globals.browser, ...globals.node } },
+  },
 ])
