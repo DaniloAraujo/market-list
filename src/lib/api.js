@@ -1,3 +1,5 @@
+import { clearOfflineData } from './offlineCache';
+
 const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 
 export const API_ENABLED = BASE_URL !== '';
@@ -19,6 +21,7 @@ export const tokenStorage = {
     }
   },
   clear() {
+    clearOfflineData();
     try {
       localStorage.removeItem(TOKEN_KEY);
     } catch {

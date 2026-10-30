@@ -15,10 +15,11 @@ A modern list app built with React and Vite. Make lists for groceries, home, tri
 - 🎉 **Progress** - Running totals and a celebration when the list is complete
 - 💾 **Local mode** - Without an account, lists stay in the browser (localStorage)
 - ☁️ **Cloud mode** - Sign in (e-mail/password or Google) to keep up to 3 lists (150 items each) in your account, on any device
-- 🔗 **Sharing** - Invite people by link as *read-only* or *editor*; shared lists show up in the **Convidado** section
+- 🔗 **Sharing** - Invite people by link (valid for one person, expires in 1 hour) as *read-only* or *editor*; shared lists appear next to your own, and the owner can remove people at any time
 - 🗑️ **Delete account** - Accounts are deactivated, not erased; the same e-mail (or Google) can reactivate it and bring the lists back
 - 🔄 **Real time** - Changes made by other people or other devices appear instantly (WebSocket)
 - 📱 **PWA Ready** - Installable as a Progressive Web App
+- 📴 **Offline start** - The app shell is cached and the last synced lists are shown without a connection; changes made offline are not queued yet
 
 ## Tech Stack
 
@@ -93,6 +94,15 @@ npm run preview
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 
+## Tests
+
+```bash
+npm test
+```
+
+Vitest covers the optimistic-update ordering (out-of-order responses, rollbacks, bulk actions), the offline
+snapshot, the template data and the service worker caching rules.
+
 ## Features in Detail
 
 ### Product Management
@@ -102,15 +112,16 @@ npm run preview
 - Mark products as collected/uncollected
 
 ### List Management
-- Create unlimited shopping lists
+- Create lists from scratch or from ready-made templates (weekly groceries, baby layette, barbecue, moving, travel...)
 - Rename lists on the fly
-- Delete multiple lists at once (minimum 1 list required)
-- Switch between lists seamlessly
+- Delete a list from its menu, or leave a list that someone shared with you
+- Switch between lists with the chips at the top
 
 ### Sharing
-- Generate shareable links for any list
-- Import shared lists into your instance
-- Each imported list is independent (no sync conflicts)
+- Signed-in owners generate invite links (read-only or editor); a link works for one person and expires in 1 hour
+- Everyone with access sees changes in real time (WebSocket); each item records who edited it
+- The owner can see who has access and remove people
+- Legacy `?list=` links (a base64 copy of a list) are still imported as an independent copy in local mode
 
 ### Categories
 13 pre-defined categories with custom icons and colors:
@@ -119,6 +130,10 @@ npm run preview
 - Fitness, Itens da Semana, Outros
 
 ## PWA Support
+
+Invite and e-mail links open the installed app when the platform allows it: Android and desktop Chrome/Edge
+use the manifest (`scope`, `handle_links`, `launch_handler`). iOS never opens links in a Home Screen app, so
+there the link opens in Safari.
 
 The app is configured as a Progressive Web App and can be installed on:
 - **Desktop** - Chrome, Edge, Firefox

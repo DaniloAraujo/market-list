@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { API_ENABLED, api, onUnauthorized, tokenStorage } from '@/lib/api';
+import { readCachedUser, writeCachedUser } from '@/lib/offlineCache';
 import { AuthContext } from './auth-context';
 
 export default function AuthProvider({ children }) {
@@ -13,11 +14,20 @@ export default function AuthProvider({ children }) {
     if (state.status !== 'loading') return;
     let cancelled = false;
     api('/v1/me')
-      .then(({ user }) => !cancelled && setState({ status: 'authed', user }))
+      .then(({ user }) => {
+        if (cancelled) return;
+        writeCachedUser(user);
+        setState({ status: 'authed', user });
+      })
       .catch((error) => {
         if (cancelled) return;
-        if (error.status === 401) tokenStorage.clear();
-        setState({ status: 'guest', user: null });
+        if (error.status === 401) {
+          tokenStorage.clear();
+          setState({ status: 'guest', user: null });
+          return;
+        }
+        const cached = readCachedUser();
+        setState(cached ? { status: 'authed', user: cached } : { status: 'guest', user: null });
       });
     return () => {
       cancelled = true;
@@ -38,6 +48,7 @@ export default function AuthProvider({ children }) {
 
   const startSession = useCallback(({ token, user }) => {
     tokenStorage.set(token);
+    writeCachedUser(user);
     setState({ status: 'authed', user });
   }, []);
 
@@ -67,7 +78,10 @@ export default function AuthProvider({ children }) {
     setState({ status: 'guest', user: null });
   }, []);
 
-  const updateUser = useCallback((user) => setState((current) => (current.status === 'authed' ? { ...current, user } : current)), []);
+  const updateUser = useCallback((user) => {
+    writeCachedUser(user);
+    setState((current) => (current.status === 'authed' ? { ...current, user } : current));
+  }, []);
 
   const value = useMemo(
     () => ({ ...state, enabled: API_ENABLED, login, exchangeCode, logout, deleteAccount, updateUser }),

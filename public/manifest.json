@@ -2,11 +2,15 @@
   "name": "Tá na Lista",
   "short_name": "Tá na Lista",
   "description": "Listas simples para compras, casa, viagens e o que você precisar.",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f8f3ea",
   "theme_color": "#e8590c",
   "orientation": "portrait-primary",
+  "handle_links": "preferred",
+  "launch_handler": { "client_mode": ["navigate-existing", "auto"] },
   "icons": [
     {
       "src": "/icon-192.png",

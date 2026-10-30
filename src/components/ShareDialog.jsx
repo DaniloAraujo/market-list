@@ -22,7 +22,12 @@ const ROLES = {
   editor: { label: 'Pode editar', hint: 'A pessoa adiciona, marca e remove itens. As mudanças aparecem na hora para todos.', Icon: Pencil },
 };
 
-const formatDate = (ms) => new Date(ms).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+const formatUntil = (ms) => {
+  const date = new Date(ms);
+  const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  if (date.toDateString() === new Date().toDateString()) return time;
+  return `${date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}, ${time}`;
+};
 
 function RoleSelect({ value, onChange, disabled }) {
   return (
@@ -122,7 +127,7 @@ function InviteSection({ listId, invites, onChanged }) {
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            O link vale para uma pessoa e expira em 7 dias. Quem abrir precisa entrar na conta para ver a lista.
+            O link vale para uma pessoa e expira em 1 hora. Quem abrir precisa entrar na conta para ver a lista.
           </p>
         </div>
       ) : (
@@ -139,7 +144,7 @@ function InviteSection({ listId, invites, onChanged }) {
               <li key={invite.id} className="flex items-center gap-2 px-3 py-2 text-sm">
                 <span className="flex-1">
                   {ROLES[invite.role].label}
-                  <span className="text-xs text-muted-foreground"> · até {formatDate(invite.expiresAt)}</span>
+                  <span className="text-xs text-muted-foreground"> · até {formatUntil(invite.expiresAt)}</span>
                 </span>
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" onClick={() => revoke(invite.id)}>
                   Cancelar

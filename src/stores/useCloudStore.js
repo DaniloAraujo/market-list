@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { templateCategories, templateToItems } from '@/data/listTemplates';
+import { readSnapshot, writeSnapshot } from '@/lib/offlineCache';
 import { useListSocket } from './useListSocket';
 
 const currentKey = (userId) => `cloud:current:${userId}`;
@@ -49,14 +50,21 @@ const GONE_MESSAGES = {
 };
 
 export function useCloudStore(user) {
-  const [lists, setLists] = useState({ owned: [], shared: [] });
-  const [limits, setLimits] = useState({ maxLists: 3, maxItemsPerList: 150 });
-  const [ready, setReady] = useState(false);
+  const [snapshot] = useState(() => readSnapshot(user.id));
+  const [lists, setLists] = useState(snapshot?.lists ?? { owned: [], shared: [] });
+  const [limits, setLimits] = useState(snapshot?.limits ?? { maxLists: 3, maxItemsPerList: 150 });
+  const [ready, setReady] = useState(Boolean(snapshot));
   const [preferredId, setPreferredId] = useState(() => readSavedCurrent(user.id));
-  const [itemsByList, setItemsByList] = useState({});
-  const [categoriesByList, setCategoriesByList] = useState({});
+  const [itemsByList, setItemsByList] = useState(snapshot?.itemsByList ?? {});
+  const [categoriesByList, setCategoriesByList] = useState(snapshot?.categoriesByList ?? {});
   const [connection, setConnection] = useState('connecting');
   const [membersVersion, setMembersVersion] = useState(0);
+
+  useEffect(() => {
+    if (!synced.current) return undefined;
+    const timer = setTimeout(() => writeSnapshot(user.id, { lists, limits, itemsByList, categoriesByList }), 400);
+    return () => clearTimeout(timer);
+  }, [user.id, lists, limits, itemsByList, categoriesByList]);
 
   const allLists = useMemo(() => [...lists.owned, ...lists.shared], [lists]);
   const currentId = allLists.some((l) => l.id === preferredId) ? preferredId : (allLists[0]?.id ?? null);
@@ -66,6 +74,9 @@ export function useCloudStore(user) {
     latest.current = { itemsByList, lists, currentId };
   });
   const savedNames = useRef({});
+  const itemSeq = useRef({});
+  const synced = useRef(false);
+  const mutations = useRef(0);
 
   const patchSummary = useCallback((summary) => {
     savedNames.current[summary.id] = summary.name;
@@ -78,6 +89,7 @@ export function useCloudStore(user) {
     for (const l of [...data.owned, ...data.shared]) savedNames.current[l.id] = l.name;
     setLists({ owned: data.owned, shared: data.shared });
     setLimits(data.limits);
+    synced.current = true;
     setReady(true);
   }, []);
 
@@ -223,15 +235,19 @@ export function useCloudStore(user) {
       const listId = latest.current.currentId;
       const before = itemsOf(listId).find((p) => p.id === itemId);
       if (!before) return;
+      mutations.current += 1;
+      const seq = (itemSeq.current[itemId] ?? 0) + 1;
+      itemSeq.current[itemId] = seq;
+      const isLatest = () => itemSeq.current[itemId] === seq;
       upsert(listId, { ...before, ...fields });
       try {
         const { item } = await api(`/v1/lists/${listId}/items/${itemId}`, {
           method: 'PATCH',
           body: toApiFields(fields),
         });
-        upsert(listId, toProduct(item));
+        if (isLatest()) upsert(listId, toProduct(item));
       } catch (error) {
-        upsert(listId, before);
+        if (isLatest()) upsert(listId, before);
         toast.error(error.message);
       }
     },
@@ -249,6 +265,8 @@ export function useCloudStore(user) {
   const removeProduct = useCallback(
     async (itemId) => {
       const listId = latest.current.currentId;
+      mutations.current += 1;
+      itemSeq.current[itemId] = (itemSeq.current[itemId] ?? 0) + 1;
       setItemsByList((prev) => ({ ...prev, [listId]: (prev[listId] ?? []).filter((p) => p.id !== itemId) }));
       try {
         await api(`/v1/lists/${listId}/items/${itemId}`, { method: 'DELETE' });
@@ -263,10 +281,13 @@ export function useCloudStore(user) {
   const bulk = useCallback(
     async (action, optimistic) => {
       const listId = latest.current.currentId;
+      mutations.current += 1;
+      const mark = mutations.current;
       setItemsByList((prev) => ({ ...prev, [listId]: optimistic(prev[listId] ?? []) }));
       try {
         const { items } = await api(`/v1/lists/${listId}/items/actions`, { method: 'POST', body: { action } });
-        setItems(listId, items.map(toProduct));
+        if (mutations.current === mark) setItems(listId, items.map(toProduct));
+        else loadList(listId);
       } catch (error) {
         toast.error(error.message);
         loadList(listId);
