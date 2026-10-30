@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useStore } from '@/stores/store-context';
 import { categoryChartColor, resolveCategory } from '@/utils/categoryUtils';
 import { formatBRL } from '@/utils/currencyUtils';
+import { lineTotal } from '@/utils/quantityUtils';
 import { cn } from '@/lib/utils';
 
 const METRICS = [
@@ -54,7 +55,7 @@ export default function ChartsScreen() {
   const lists = useMemo(() => [...owned, ...shared], [owned, shared]);
 
   const stats = useMemo(() => {
-    const priced = (product) => product.unitPrice * product.quantity;
+    const priced = lineTotal;
     const total = products.reduce((sum, product) => sum + priced(product), 0);
     const inCart = products.filter((product) => product.collected).reduce((sum, product) => sum + priced(product), 0);
     const collected = products.filter((product) => product.collected).length;
@@ -70,7 +71,7 @@ export default function ChartsScreen() {
       const category = resolveCategory(product.category, custom);
       const entry = groups.get(category.key) ?? { category, items: 0, value: 0 };
       entry.items += 1;
-      entry.value += product.unitPrice * product.quantity;
+      entry.value += lineTotal(product);
       groups.set(category.key, entry);
     }
     return [...groups.values()]

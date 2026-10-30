@@ -12,6 +12,7 @@ const toProduct = (item) => ({
   name: item.name,
   category: item.category,
   quantity: item.quantity,
+  unit: item.unit ?? 'un',
   unitPrice: item.unitPriceCents / 100,
   note: item.note ?? '',
   collected: item.collected,
@@ -26,6 +27,7 @@ const toApiFields = (fields) => {
   if ('name' in fields) body.name = fields.name;
   if ('category' in fields) body.category = fields.category;
   if ('quantity' in fields) body.quantity = fields.quantity;
+  if ('unit' in fields) body.unit = fields.unit;
   if ('unitPrice' in fields) body.unitPriceCents = toCents(fields.unitPrice);
   if ('note' in fields) body.note = fields.note ?? '';
   if ('collected' in fields) body.collected = fields.collected;
@@ -34,7 +36,7 @@ const toApiFields = (fields) => {
 
 const NO_CATEGORIES = [];
 
-const EDITABLE = ['name', 'category', 'quantity', 'unitPrice', 'note', 'collected'];
+const EDITABLE = ['name', 'category', 'quantity', 'unit', 'unitPrice', 'note', 'collected'];
 
 const readSavedCurrent = (userId) => {
   try {

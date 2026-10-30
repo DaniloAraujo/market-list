@@ -1,4 +1,8 @@
-const item = (name, category = 'outros', quantity = 1, note = '') => ({ name, category, quantity, note });
+const item = (name, category = 'outros', quantity = 1, note = '') => ({ name, category, quantity, unit: 'un', note });
+
+const kg = (name, category, kilos, note = '') => ({ name, category, quantity: Math.round(kilos * 4), unit: 'kg', note });
+
+const pack = (name, category, quantity, note = '') => ({ name, category, quantity, unit: 'pct', note });
 
 export const LIST_TEMPLATES = [
   {
@@ -9,20 +13,20 @@ export const LIST_TEMPLATES = [
     items: [
       item('Banana', 'hortifruti', 6),
       item('Maçã', 'hortifruti', 6),
-      item('Tomate', 'hortifruti', 1, 'Cerca de 1 kg'),
-      item('Cebola', 'hortifruti', 1),
-      item('Batata', 'hortifruti', 1),
+      kg('Tomate', 'hortifruti', 1),
+      kg('Cebola', 'hortifruti', 1),
+      kg('Batata', 'hortifruti', 1),
       item('Cenoura', 'hortifruti'),
       item('Alface', 'hortifruti'),
       item('Limão', 'hortifruti', 4),
-      item('Peito de frango', 'acougue', 1),
-      item('Carne moída', 'acougue', 1),
+      kg('Peito de frango', 'acougue', 1),
+      kg('Carne moída', 'acougue', 0.5),
       item('Ovos', 'alimentos', 1, 'Uma dúzia'),
       item('Pão francês', 'padaria', 1),
       item('Pão de forma', 'padaria'),
       item('Arroz', 'alimentos'),
       item('Feijão', 'alimentos'),
-      item('Macarrão', 'alimentos', 2),
+      pack('Macarrão', 'alimentos', 2),
       item('Molho de tomate', 'alimentos', 2),
       item('Óleo de soja', 'alimentos'),
       item('Açúcar', 'alimentos'),
@@ -66,8 +70,8 @@ export const LIST_TEMPLATES = [
       item('Manta', 'x-roupas', 3),
       item('Cueiro', 'x-roupas', 6),
       item('Toalha com capuz', 'x-roupas', 2),
-      item('Fraldas tamanho RN', 'higiene', 2, 'Pacotes. Não compre muitas antes de saber o tamanho do bebê'),
-      item('Fraldas tamanho P', 'higiene', 2),
+      pack('Fraldas tamanho RN', 'higiene', 2, 'Não compre muitas antes de saber o tamanho do bebê'),
+      pack('Fraldas tamanho P', 'higiene', 2),
       item('Lenços umedecidos', 'higiene', 3),
       item('Pomada para assadura', 'farmacia'),
       item('Sabonete líquido do bebê', 'higiene'),
@@ -101,11 +105,11 @@ export const LIST_TEMPLATES = [
       { key: 'x-carvao', name: 'Carvão e fogo', emoji: '🔥' },
     ],
     items: [
-      item('Picanha', 'acougue', 1, 'Calcule cerca de 400 g de carne por pessoa'),
-      item('Maminha', 'acougue', 1),
-      item('Fraldinha', 'acougue', 1),
-      item('Linguiça toscana', 'acougue', 1),
-      item('Coxa e sobrecoxa de frango', 'acougue', 1),
+      kg('Picanha', 'acougue', 1, 'Calcule cerca de 400 g de carne por pessoa'),
+      kg('Maminha', 'acougue', 1),
+      kg('Fraldinha', 'acougue', 1),
+      kg('Linguiça toscana', 'acougue', 1),
+      kg('Coxa e sobrecoxa de frango', 'acougue', 1.5),
       item('Pão de alho', 'padaria', 2),
       item('Queijo coalho', 'alimentos', 1),
       item('Farofa pronta', 'alimentos', 1),
@@ -221,13 +225,13 @@ export const LIST_TEMPLATES = [
       { key: 'x-utensilios', name: 'Utensílios', emoji: '🥡' },
     ],
     items: [
-      item('Peito de frango', 'acougue', 2),
-      item('Patinho moído', 'acougue', 1),
-      item('Tilápia ou salmão', 'acougue', 1),
+      kg('Peito de frango', 'acougue', 2),
+      kg('Patinho moído', 'acougue', 1),
+      kg('Tilápia ou salmão', 'acougue', 1),
       item('Ovos', 'alimentos', 1, 'Duas dúzias'),
       item('Arroz integral', 'alimentos'),
       item('Feijão', 'alimentos'),
-      item('Batata-doce', 'hortifruti', 1),
+      kg('Batata-doce', 'hortifruti', 1),
       item('Aveia em flocos', 'alimentos'),
       item('Pasta de amendoim', 'alimentos'),
       item('Iogurte natural ou grego', 'alimentos', 6),
@@ -389,4 +393,4 @@ export const LIST_TEMPLATES = [
 export const templateCategories = (template) => template.categories ?? [];
 
 export const templateToItems = (template) =>
-  template.items.map(({ name, category, quantity, note }) => ({ name, category, quantity, note }));
+  template.items.map(({ name, category, quantity, unit, note }) => ({ name, category, quantity, unit, note }));

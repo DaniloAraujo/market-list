@@ -4,17 +4,18 @@ import { Check, X } from 'lucide-react';
 import { useCategories } from '@/categories/categories-context';
 import { categoryToneClasses, resolveCategory } from '@/utils/categoryUtils';
 import { formatBRL } from '@/utils/currencyUtils';
+import { formatQuantity, lineTotal, priceSuffix, showQuantity, unitOf } from '@/utils/quantityUtils';
 import { cn } from '@/lib/utils';
 
 const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete, readOnly = false, currentUserId }, ref) => {
-  const { name, category, quantity, unitPrice, collected, updatedBy, note } = product;
+  const { name, category, unitPrice, collected, updatedBy, note } = product;
   const editedByOther = updatedBy && updatedBy.id !== currentUserId ? updatedBy.name : null;
   const hasPrice = unitPrice > 0;
   const { custom } = useCategories();
   const chosen = resolveCategory(category, custom);
   const details = [
-    quantity > 1 ? `${quantity} un.` : null,
-    hasPrice && quantity > 1 ? `× ${formatBRL(unitPrice)}` : null,
+    showQuantity(product) ? formatQuantity(product) : null,
+    hasPrice && showQuantity(product) ? `${unitOf(product) === 'kg' ? '' : '× '}${formatBRL(unitPrice)}${priceSuffix(unitOf(product))}` : null,
     editedByOther ? `por ${editedByOther}` : null,
   ]
     .filter(Boolean)
@@ -86,7 +87,7 @@ const ProductItem = forwardRef(({ product, onToggle, onEdit, onDelete, readOnly 
 
       {hasPrice && (
         <span className={cn('text-sm tabular-nums', collected ? 'text-muted-foreground' : 'text-foreground')}>
-          {formatBRL(unitPrice * quantity)}
+          {formatBRL(lineTotal(product))}
         </span>
       )}
       {!readOnly && (

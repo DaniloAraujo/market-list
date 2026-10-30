@@ -9,6 +9,7 @@ function EditForm({ product, onSave, onClose }) {
     name: product.name,
     category: product.category,
     quantity: product.quantity,
+    unit: product.unit ?? 'un',
     priceCents: reaisToCents(product.unitPrice),
     note: product.note ?? '',
   });
@@ -29,6 +30,7 @@ function EditForm({ product, onSave, onClose }) {
       name: values.name.trim(),
       category: values.category || 'outros',
       quantity: Number(values.quantity) || 1,
+      unit: values.unit,
       unitPrice: centsToReais(values.priceCents),
       note: values.note.trim(),
     });

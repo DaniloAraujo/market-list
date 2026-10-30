@@ -4,7 +4,9 @@ import { Textarea } from '@/components/ui/textarea';
 import Field from './Field';
 import CategorySelect from './CategorySelect';
 import QuantityStepper from './QuantityStepper';
+import UnitToggle from './UnitToggle';
 import CurrencyInput from './CurrencyInput';
+import { priceLabel, quantityAfterUnitChange } from '@/utils/quantityUtils';
 import { cn } from '@/lib/utils';
 
 export const NOTE_MAX = 255;
@@ -26,15 +28,25 @@ export const NameField = forwardRef(({ value, error, onChange, label = 'Produto'
 NameField.displayName = 'NameField';
 
 export function DetailFields({ values, onChange, compact = false }) {
+  const unit = values.unit ?? 'un';
+
   return (
     <div className={cn('grid grid-cols-2 gap-3 [&>*]:min-w-0', !compact && 'md:grid-cols-[1.3fr_1fr_1fr]')}>
       <Field label="Categoria" className={cn('col-span-2', !compact && 'md:col-span-1')}>
         <CategorySelect value={values.category} onValueChange={(category) => onChange({ category })} />
       </Field>
-      <Field label="Quantidade">
-        <QuantityStepper value={values.quantity} onChange={(quantity) => onChange({ quantity })} />
+      <Field
+        label="Quantidade"
+        action={
+          <UnitToggle
+            value={unit}
+            onChange={(next) => onChange({ unit: next, quantity: quantityAfterUnitChange(unit, next, values.quantity) })}
+          />
+        }
+      >
+        <QuantityStepper value={values.quantity} unit={unit} onChange={(quantity) => onChange({ quantity })} />
       </Field>
-      <Field label="Valor unitário" optional>
+      <Field label={priceLabel(unit)} optional>
         <CurrencyInput value={values.priceCents} onChange={(priceCents) => onChange({ priceCents })} />
       </Field>
       <Field

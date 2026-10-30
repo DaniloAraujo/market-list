@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { LIST_TEMPLATES, templateCategories } from '@/data/listTemplates';
 import { BUILTIN_CATEGORIES } from '@/utils/categoryUtils';
+import { formatQuantity, showQuantity } from '@/utils/quantityUtils';
 
 const EMOJI_BY_CATEGORY = Object.fromEntries(BUILTIN_CATEGORIES.map((category) => [category.key, category.emoji]));
 
@@ -86,7 +87,7 @@ function Preview({ template, onBack, onCreate, busy }) {
               <span className="block">{entry.name}</span>
               {entry.note && <span className="block text-xs text-muted-foreground">{entry.note}</span>}
             </span>
-            {entry.quantity > 1 && <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{entry.quantity} un.</span>}
+            {showQuantity(entry) && <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{formatQuantity(entry)}</span>}
           </li>
         ))}
       </ul>

@@ -1,10 +1,11 @@
 import { formatBRL } from '@/utils/currencyUtils';
+import { lineTotal } from '@/utils/quantityUtils';
 
 export default function TotalBar({ products }) {
-  const total = products.reduce((sum, p) => sum + p.unitPrice * p.quantity, 0);
+  const total = products.reduce((sum, p) => sum + lineTotal(p), 0);
   if (total <= 0) return null;
 
-  const inCart = products.filter((p) => p.collected).reduce((sum, p) => sum + p.unitPrice * p.quantity, 0);
+  const inCart = products.filter((p) => p.collected).reduce((sum, p) => sum + lineTotal(p), 0);
 
   return (
     <div className="sticky bottom-0 z-20 -mx-4 mt-6 flex items-baseline justify-between border-t bg-background px-4 py-3">

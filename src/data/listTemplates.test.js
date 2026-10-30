@@ -29,6 +29,7 @@ describe('modelos de lista', () => {
       expect(item.note.length).toBeLessThanOrEqual(255);
       expect(item.quantity).toBeGreaterThanOrEqual(1);
       expect(item.quantity).toBeLessThanOrEqual(999);
+      expect(['un', 'pct', 'kg']).toContain(item.unit);
       expect(BUILTIN.has(item.category) || own.has(item.category)).toBe(true);
       expect(names.has(item.name)).toBe(false);
       names.add(item.name);

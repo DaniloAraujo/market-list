@@ -127,7 +127,7 @@ function InviteSection({ listId, invites, onChanged }) {
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            O link vale para uma pessoa e expira em 1 hora. Quem abrir precisa entrar na conta para ver a lista.
+            O link vale para uma pessoa e expira em 4 horas. Quem abrir precisa entrar na conta para ver a lista.
           </p>
         </div>
       ) : (

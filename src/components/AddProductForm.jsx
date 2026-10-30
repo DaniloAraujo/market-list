@@ -6,14 +6,15 @@ import { DetailFields, NameField } from '@/components/form/ProductFields';
 import { centsToReais, formatBRL } from '@/utils/currencyUtils';
 import { useCategories } from '@/categories/categories-context';
 import { getCategoryLabel } from '@/utils/categoryUtils';
+import { formatQuantity, showQuantity } from '@/utils/quantityUtils';
 import { cn } from '@/lib/utils';
 
-const EMPTY = { name: '', category: '', quantity: 1, priceCents: '', note: '' };
+const EMPTY = { name: '', category: '', quantity: 1, unit: 'un', priceCents: '', note: '' };
 
-const summarize = ({ category, quantity, priceCents, note }, custom) =>
+const summarize = ({ category, quantity, unit, priceCents, note }, custom) =>
   [
     category ? getCategoryLabel(category, custom) : null,
-    quantity > 1 ? `${quantity} un.` : null,
+    showQuantity({ quantity, unit }) ? formatQuantity({ quantity, unit }) : null,
     priceCents ? formatBRL(centsToReais(priceCents)) : null,
     note.trim() ? 'com observação' : null,
   ]
@@ -42,6 +43,7 @@ export default function AddProductForm({ onAdd, blockedReason, count, max }) {
       name: values.name,
       category: activeCategory,
       quantity: Number(values.quantity) || 1,
+      unit: values.unit,
       unitPrice: centsToReais(values.priceCents),
       note: values.note.trim(),
     });

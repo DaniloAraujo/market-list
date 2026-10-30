@@ -7,6 +7,7 @@ A modern list app built with React and Vite. Make lists for groceries, home, tri
 - 🛒 **Multiple Lists Management** - Create and manage multiple shopping lists
 - 📦 **Product Organization** - Categorize products with 13+ categories (Hortifruti, Açougue, Padaria, etc.)
 - 💰 **Price Tracking** - Add and track unit prices with automatic total calculations
+- ⚖️ **Units** - Items are counted in units by default; switch to packages or kilos (kilos move in 250 g steps: 250 g, 500 g, 750 g, 1 kg, 1.25 kg...) and the price becomes per kg
 - ✅ **Check-off Items** - Mark products as collected with visual feedback
 - 🔍 **Filter & Search** - Filter products by category and view by status (pending/collected)
 - 📱 **Responsive Design** - Works seamlessly on desktop and mobile devices
@@ -15,7 +16,7 @@ A modern list app built with React and Vite. Make lists for groceries, home, tri
 - 🎉 **Progress** - Running totals and a celebration when the list is complete
 - 💾 **Local mode** - Without an account, lists stay in the browser (localStorage)
 - ☁️ **Cloud mode** - Sign in (e-mail/password or Google) to keep up to 3 lists (150 items each) in your account, on any device
-- 🔗 **Sharing** - Invite people by link (valid for one person, expires in 1 hour) as *read-only* or *editor*; shared lists appear next to your own, and the owner can remove people at any time
+- 🔗 **Sharing** - Invite people by link (valid for one person, expires in 4 hours) as *read-only* or *editor*; shared lists appear next to your own, and the owner can remove people at any time
 - 🗑️ **Delete account** - Accounts are deactivated, not erased; the same e-mail (or Google) can reactivate it and bring the lists back
 - 🔄 **Real time** - Changes made by other people or other devices appear instantly (WebSocket)
 - 📱 **PWA Ready** - Installable as a Progressive Web App
@@ -118,7 +119,7 @@ snapshot, the template data and the service worker caching rules.
 - Switch between lists with the chips at the top
 
 ### Sharing
-- Signed-in owners generate invite links (read-only or editor); a link works for one person and expires in 1 hour
+- Signed-in owners generate invite links (read-only or editor); a link works for one person and expires in 4 hours
 - Everyone with access sees changes in real time (WebSocket); each item records who edited it
 - The owner can see who has access and remove people
 - Legacy `?list=` links (a base64 copy of a list) are still imported as an independent copy in local mode

@@ -97,6 +97,7 @@ export function useShoppingLists() {
         name: entry.name,
         category: idByKey.get(entry.category) ?? entry.category,
         quantity: entry.quantity,
+        unit: entry.unit,
         unitPrice: 0,
         note: entry.note,
         collected: false,
@@ -165,7 +166,7 @@ export function useShoppingLists() {
   );
 
   const addProduct = useCallback(
-    ({ name, category, quantity, unitPrice, note }) =>
+    ({ name, category, quantity, unit, unitPrice, note }) =>
       updateProducts((items) => [
         ...items,
         {
@@ -173,6 +174,7 @@ export function useShoppingLists() {
           name: name.trim(),
           category: category || 'outros',
           quantity: quantity > 0 ? quantity : 1,
+          unit: unit ?? 'un',
           unitPrice: unitPrice || 0,
           note: String(note ?? '').trim().slice(0, 255),
           collected: false,
