@@ -1,6 +1,5 @@
 export const UNITS = [
   { value: 'un', label: 'Un', name: 'Unidade' },
-  { value: 'pct', label: 'Pct', name: 'Pacote' },
   { value: 'kg', label: 'Kg', name: 'Quilo' },
 ];
 
@@ -26,12 +25,12 @@ export const formatKg = (quarters) => {
 export const formatQuantity = (product) => {
   const unit = unitOf(product);
   if (unit === 'kg') return formatKg(product.quantity);
-  return `${product.quantity} ${unit === 'pct' ? 'pct.' : 'un.'}`;
+  return `${product.quantity} un.`;
 };
 
 export const showQuantity = (product) => unitOf(product) !== 'un' || product.quantity > 1;
 
-export const priceLabel = (unit) => (unit === 'kg' ? 'Valor por kg' : unit === 'pct' ? 'Valor por pacote' : 'Valor unitário');
+export const priceLabel = (unit) => (unit === 'kg' ? 'Valor por kg' : 'Valor unitário');
 
 export const priceSuffix = (unit) => (unit === 'kg' ? '/kg' : '');
 

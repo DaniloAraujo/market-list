@@ -35,6 +35,7 @@ describe('unidade do item', () => {
   it('assume unidade quando o item não tem unidade (listas antigas)', () => {
     expect(unitOf({ quantity: 2 })).toBe('un');
     expect(unitOf({ quantity: 2, unit: 'litro' })).toBe('un');
+    expect(unitOf({ quantity: 2, unit: 'pct' })).toBe('un');
     expect(unitOf({ quantity: 2, unit: 'kg' })).toBe('kg');
   });
 
@@ -48,9 +49,7 @@ describe('unidade do item', () => {
   it('mostra a quantidade só quando agrega informação', () => {
     expect(showQuantity({ quantity: 1, unit: 'un' })).toBe(false);
     expect(showQuantity({ quantity: 2, unit: 'un' })).toBe(true);
-    expect(showQuantity({ quantity: 1, unit: 'pct' })).toBe(true);
     expect(showQuantity({ quantity: 2, unit: 'kg' })).toBe(true);
-    expect(formatQuantity({ quantity: 3, unit: 'pct' })).toBe('3 pct.');
     expect(formatQuantity({ quantity: 2, unit: 'un' })).toBe('2 un.');
     expect(formatQuantity({ quantity: 2, unit: 'kg' })).toBe('500 g');
   });
@@ -58,10 +57,8 @@ describe('unidade do item', () => {
   it('ajusta a quantidade ao trocar de unidade e o texto do valor', () => {
     expect(quantityAfterUnitChange('un', 'kg', 7)).toBe(4);
     expect(quantityAfterUnitChange('kg', 'un', 6)).toBe(1);
-    expect(quantityAfterUnitChange('un', 'pct', 3)).toBe(3);
     expect(quantityAfterUnitChange('kg', 'kg', 6)).toBe(6);
     expect(priceLabel('kg')).toBe('Valor por kg');
-    expect(priceLabel('pct')).toBe('Valor por pacote');
     expect(priceLabel('un')).toBe('Valor unitário');
   });
 });

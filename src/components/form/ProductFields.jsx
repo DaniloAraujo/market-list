@@ -32,7 +32,7 @@ export function DetailFields({ values, onChange, compact = false }) {
 
   return (
     <div className={cn('grid grid-cols-2 gap-3 [&>*]:min-w-0', !compact && 'md:grid-cols-[1.3fr_1fr_1fr]')}>
-      <Field label="Categoria" className={cn('col-span-2', !compact && 'md:col-span-1')}>
+      <Field label="Categoria" tallLabel className={cn('col-span-2', !compact && 'md:col-span-1')}>
         <CategorySelect value={values.category} onValueChange={(category) => onChange({ category })} />
       </Field>
       <Field
@@ -46,7 +46,7 @@ export function DetailFields({ values, onChange, compact = false }) {
       >
         <QuantityStepper value={values.quantity} unit={unit} onChange={(quantity) => onChange({ quantity })} />
       </Field>
-      <Field label={priceLabel(unit)} optional>
+      <Field label={priceLabel(unit)} optional tallLabel>
         <CurrencyInput value={values.priceCents} onChange={(priceCents) => onChange({ priceCents })} />
       </Field>
       <Field

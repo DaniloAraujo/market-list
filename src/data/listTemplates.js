@@ -2,8 +2,6 @@ const item = (name, category = 'outros', quantity = 1, note = '') => ({ name, ca
 
 const kg = (name, category, kilos, note = '') => ({ name, category, quantity: Math.round(kilos * 4), unit: 'kg', note });
 
-const pack = (name, category, quantity, note = '') => ({ name, category, quantity, unit: 'pct', note });
-
 export const LIST_TEMPLATES = [
   {
     id: 'compras-da-semana',
@@ -26,7 +24,7 @@ export const LIST_TEMPLATES = [
       item('Pão de forma', 'padaria'),
       item('Arroz', 'alimentos'),
       item('Feijão', 'alimentos'),
-      pack('Macarrão', 'alimentos', 2),
+      item('Macarrão', 'alimentos', 2),
       item('Molho de tomate', 'alimentos', 2),
       item('Óleo de soja', 'alimentos'),
       item('Açúcar', 'alimentos'),
@@ -70,8 +68,8 @@ export const LIST_TEMPLATES = [
       item('Manta', 'x-roupas', 3),
       item('Cueiro', 'x-roupas', 6),
       item('Toalha com capuz', 'x-roupas', 2),
-      pack('Fraldas tamanho RN', 'higiene', 2, 'Não compre muitas antes de saber o tamanho do bebê'),
-      pack('Fraldas tamanho P', 'higiene', 2),
+      item('Fraldas tamanho RN', 'higiene', 2, 'Pacotes. Não compre muitas antes de saber o tamanho do bebê'),
+      item('Fraldas tamanho P', 'higiene', 2, 'Pacotes'),
       item('Lenços umedecidos', 'higiene', 3),
       item('Pomada para assadura', 'farmacia'),
       item('Sabonete líquido do bebê', 'higiene'),

@@ -28,7 +28,7 @@ const toImportItem = (product) => ({
   name: String(product.name ?? '').trim().slice(0, 80),
   category: product.category,
   quantity: Math.min(999, Math.max(1, Number(product.quantity) || 1)),
-  unit: ['un', 'pct', 'kg'].includes(product.unit) ? product.unit : 'un',
+  unit: ['un', 'kg'].includes(product.unit) ? product.unit : 'un',
   unitPriceCents: Math.max(0, Math.round((Number(product.unitPrice) || 0) * 100)),
   note: String(product.note ?? '').trim().slice(0, 255),
   collected: Boolean(product.collected),

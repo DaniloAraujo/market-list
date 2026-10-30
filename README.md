@@ -7,7 +7,7 @@ A modern list app built with React and Vite. Make lists for groceries, home, tri
 - 🛒 **Multiple Lists Management** - Create and manage multiple shopping lists
 - 📦 **Product Organization** - Categorize products with 13+ categories (Hortifruti, Açougue, Padaria, etc.)
 - 💰 **Price Tracking** - Add and track unit prices with automatic total calculations
-- ⚖️ **Units** - Items are counted in units by default; switch to packages or kilos (kilos move in 250 g steps: 250 g, 500 g, 750 g, 1 kg, 1.25 kg...) and the price becomes per kg
+- ⚖️ **Units** - Items are counted in units by default; switch to kilos (250 g steps: 250 g, 500 g, 750 g, 1 kg, 1.25 kg...) and the price becomes per kg
 - ✅ **Check-off Items** - Mark products as collected with visual feedback
 - 🔍 **Filter & Search** - Filter products by category and view by status (pending/collected)
 - 📱 **Responsive Design** - Works seamlessly on desktop and mobile devices
